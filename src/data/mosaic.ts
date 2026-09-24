@@ -10,23 +10,23 @@ import type { MosaicConfig } from "../lib/mosaic";
  */
 
 /**
- * Grands écrans (≥ 1024 px) : l'allée sort de la photo d'accueil par la gauche,
- * serpente sous le titre et remonte dans la photo par la droite.
- * Les 360 premières unités (y < 360) passent sous la photo d'accueil (fondu) et
- * autour du titre, placé dans le creux entre les deux branches.
+ * Grands écrans (≥ 1024 px) : l'allée entre par le bord gauche de la page,
+ * serpente en S sous le titre et sort par le bord droit.
+ * `depart` et `arrivee` sont hors cadre (x < 0 et x > width) : l'allée est coupée
+ * par les bords de la page, comme si elle continuait au-delà.
  */
 export const allee: MosaicConfig = {
   width: 1440,
-  height: 1250,
-  depart: [120, -40],
+  height: 1000,
+  depart: [-220, 580],
   points: [
-    [205, 670],
-    [475, 955],
-    [745, 670],
-    [1010, 955],
-    [1265, 670],
+    [210, 480],
+    [480, 765],
+    [745, 480],
+    [1010, 765],
+    [1235, 480],
   ],
-  arrivee: [1320, -40],
+  arrivee: [1660, 580],
   largeur: 470,
   espacement: 70,
   degagementPhoto: 300,
@@ -38,20 +38,21 @@ export const allee: MosaicConfig = {
 };
 
 /**
- * Téléphones et tablettes : allée verticale qui sort de la photo d'accueil (fondu)
- * et descend en serpentant ; le titre est posé dans un encadré noir par-dessus.
+ * Téléphones et tablettes : allée verticale qui entre par le bord gauche en haut,
+ * descend en serpentant et sort par le bord droit en bas.
  */
 export const alleeMobile: MosaicConfig = {
   width: 400,
-  height: 1880,
-  depart: [200, -60],
+  height: 1720,
+  depart: [-260, 90],
   points: [
-    [185, 440],
-    [215, 750],
-    [185, 1060],
-    [215, 1370],
-    [185, 1680],
+    [190, 300],
+    [215, 610],
+    [185, 920],
+    [215, 1230],
+    [190, 1510],
   ],
+  arrivee: [660, 1740],
   largeur: 390,
   espacement: 56,
   degagementPhoto: 240,

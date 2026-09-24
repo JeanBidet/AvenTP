@@ -82,10 +82,9 @@ Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `
 | `joint`, `arrondi`, `lisere` | largeur des joints, arrondi des angles, bord de pierre autour des photos |
 | `graine` | autre tirage aléatoire des petites dalles pour la même forme |
 
-Sur grand écran, la zone commence 360 unités plus haut que la section : l'allée remonte
-dans la photo d'accueil (marge négative `lg:-mt-[13.9%]` dans `index.astro`, fondu `fadeTop`)
-et le titre est placé dans le creux entre les deux branches (`lg:top-[21%]`). Si vous
-déplacez fortement les points, ajustez ces deux valeurs.
+`depart` et `arrivee` sont placés hors de la page (x < 0 et x > width) : l'allée entre
+et sort par les bords. Sur grand écran, le titre est posé en haut, au-dessus du creux
+central (`lg:top-[7%]` dans `index.astro`) ; si vous changez fortement la forme, ajustez-le.
 
 Modifier une valeur puis `npm run dev` : la page se recalcule. Exemple, une diagonale :
 `points: [[150, 750], [450, 600], [750, 450], [1050, 300], [1320, 150]]`.
