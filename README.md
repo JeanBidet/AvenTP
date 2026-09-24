@@ -61,11 +61,13 @@ La section « Ce que nous réalisons » est une allée de dalles qui s'emboîten
 **calculée au build** par `src/lib/mosaic.ts` :
 
 1. une spline de Catmull-Rom passe par les `points` ; épaissie de `largeur`, elle donne l'allée ;
-2. des graines de remplissage sont tirées par échantillonnage de Poisson
-   (au moins `espacement` entre elles, au moins `degagementPhoto` des points photo) ;
-3. le diagramme de Voronoï de toutes les graines (`d3-delaunay`) pave l'allée sans trou ;
-4. chaque cellule est rétrécie de la moitié du `joint` puis arrondie (`clipper-lib`) ;
-5. les polygones deviennent des `clip-path` en pourcentages, donc la mosaïque s'adapte à l'écran.
+2. une dalle photo irrégulière est posée sur chaque point ;
+3. les graines des petites dalles sont tirées par échantillonnage de Poisson
+   (au moins `espacement` entre elles), hors des dalles photo ;
+4. leur diagramme de Voronoï (`d3-delaunay`), aux arêtes cassées en ligne brisée (`decoupe`),
+   est découpé par « allée moins dalles photo » : tout l'espace est pavé, sans trou ;
+5. chaque dalle est rétrécie de la moitié du `joint` puis arrondie (`clipper-lib`) ;
+6. les polygones deviennent des `clip-path` en pourcentages, donc la mosaïque s'adapte à l'écran.
 
 Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `alleeMobile`.
 
@@ -74,7 +76,8 @@ Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `
 | `points` | tracé de l'allée ; une photo est centrée sur chaque point (5 points = 5 types) |
 | `largeur` | épaisseur de l'allée |
 | `espacement` | taille des petites dalles (plus grand = moins de dalles, plus grosses) |
-| `degagementPhoto` | taille des dalles photo |
+| `degagementPhoto` | taille des dalles photo (diamètre ≈ 1,25 × la valeur) |
+| `decoupe` | irrégularité des bords : `0` = polygones droits, `0.25` = pierres très découpées |
 | `joint`, `arrondi`, `lisere` | largeur des joints, arrondi des angles, bord de pierre autour des photos |
 | `graine` | autre tirage aléatoire des petites dalles pour la même forme |
 

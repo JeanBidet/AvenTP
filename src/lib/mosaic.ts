@@ -4,13 +4,14 @@
  * Étapes :
  *  1. Une spline de Catmull-Rom passe par les points de l'allée (là où sont les photos).
  *  2. L'allée = cette courbe épaissie (offset de Clipper).
- *  3. Graines de remplissage par échantillonnage de Poisson (distance minimale),
- *     tenues à l'écart des points photo pour que ces dalles restent grandes.
- *  4. Diagramme de Voronoï de toutes les graines (d3-delaunay) : les cellules
- *     pavent le plan sans trou ni chevauchement.
- *  5. Chaque cellule est découpée par l'allée, rétrécie (joint constant) puis
- *     regonflée (angles arrondis).
- *  6. Sortie en pourcentages → le rendu s'adapte à la largeur du conteneur.
+ *  3. Les dalles photo sont posées d'abord : une forme irrégulière autour de chaque point.
+ *  4. Graines des petites dalles par échantillonnage de Poisson (distance minimale),
+ *     hors des dalles photo.
+ *  5. Diagramme de Voronoï de ces graines (d3-delaunay), arêtes cassées en ligne brisée
+ *     de façon identique des deux côtés, puis découpe : allée MOINS dalles photo.
+ *     Les cellules pavent donc tout l'espace restant, sans trou ni chevauchement.
+ *  6. Chaque dalle est rétrécie (joint constant) puis regonflée (angles arrondis).
+ *  7. Sortie en pourcentages → le rendu s'adapte à la largeur du conteneur.
  */
 import { Delaunay } from "d3-delaunay";
 import ClipperLib from "clipper-lib";
@@ -25,7 +26,7 @@ export interface MosaicConfig {
   largeur: number;
   /** Distance minimale entre graines de remplissage (≈ taille des petites dalles) */
   espacement: number;
-  /** Pas de petite dalle à moins de cette distance d'un point photo (≈ taille des grandes dalles / 2) */
+  /** Taille des dalles photo (leur diamètre vaut environ 1,25 × cette valeur) */
   degagementPhoto: number;
   /** Largeur des joints */
   joint: number;
@@ -33,6 +34,8 @@ export interface MosaicConfig {
   arrondi: number;
   /** Épaisseur du liseré de pierre autour des photos */
   lisere: number;
+  /** Irrégularité des bords : 0 = cellules de Voronoï droites, 0.25 = pierres très découpées */
+  decoupe: number;
   /** Graine du générateur aléatoire : même graine = même mosaïque */
   graine: number;
 }
@@ -135,8 +138,56 @@ function intersect(a: Poly, b: Poly[]): Poly[] {
   return sol.map(fromPath);
 }
 
+function difference(a: Poly, b: Poly[]): Poly[] {
+  const c = new ClipperLib.Clipper();
+  c.AddPath(toPath(a), ClipperLib.PolyType.ptSubject, true);
+  c.AddPaths(b.map(toPath), ClipperLib.PolyType.ptClip, true);
+  const sol: ClipperLib.Paths = [];
+  c.Execute(ClipperLib.ClipType.ctDifference, sol, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+  return sol.map(fromPath);
+}
+
 const inside = (pt: Pt, polys: Poly[]) =>
   polys.some((p) => ClipperLib.Clipper.PointInPolygon({ X: pt[0] * SCALE, Y: pt[1] * SCALE }, toPath(p)) !== 0);
+
+/** Hachage FNV-1a d'une chaîne → entier 32 bits (sert de graine locale). */
+function hash(str: string) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Casse chaque arête [a, b] en ligne brisée (2 points intermédiaires décalés
+ * perpendiculairement). Le décalage dépend UNIQUEMENT de l'arête (clé = extrémités
+ * triées), pas de la cellule : les deux cellules voisines reçoivent exactement la
+ * même ligne brisée, donc le pavage reste sans trou ni chevauchement.
+ */
+function roughen(poly: Poly, amount: number, seed: number): Poly {
+  if (amount <= 0) return poly;
+  const key = (p: Pt) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`;
+  const out: Poly = [];
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    out.push(a);
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (len < 12) continue;
+    // Arête orientée de façon canonique (même sens vu des deux cellules)
+    const [p, q] = key(a) < key(b) ? [a, b] : [b, a];
+    const r = rng(hash(key(p) + "|" + key(q)) ^ seed);
+    const nx = -(q[1] - p[1]) / len, ny = (q[0] - p[0]) / len; // normale unitaire
+    const mid: Pt[] = [0.33 + (r() - 0.5) * 0.12, 0.67 + (r() - 0.5) * 0.12].map((t) => {
+      const d = (r() - 0.5) * 2 * amount * len;
+      return [p[0] + (q[0] - p[0]) * t + nx * d, p[1] + (q[1] - p[1]) * t + ny * d];
+    });
+    // Parcours dans le sens de la cellule : si l'arête canonique est inversée, on inverse aussi.
+    out.push(...(p === a ? mid : mid.reverse()));
+  }
+  return out;
+}
 
 /* ---------- Générateur ---------- */
 
@@ -158,49 +209,80 @@ export function generateMosaic(cfg: MosaicConfig): Mosaic {
   const band = bandRaw.map(fromPath).flatMap((p) => intersect(p, [frame]));
   const sampleZone = offset(bandRaw.map(fromPath), cfg.espacement);
 
-  // 3. Échantillonnage de Poisson par « lancer de fléchettes » : on tire au hasard
-  //    et on rejette ce qui est trop près d'une graine existante ou d'un point photo.
+  // 3. Dalles photo : une forme irrégulière (polygone à rayon variable) autour de
+  //    chaque point, limitée par le Voronoï des seuls points photo (pas de chevauchement)
+  //    et par l'allée.
+  const pad = Math.max(W, H);
+  const photoVoronoi = Delaunay.from(points).voronoi([-pad, -pad, W + pad, H + pad]);
+  const R = cfg.degagementPhoto * 0.62;
+  const photoRegions: (Poly | null)[] = points.map(([cx, cy], i) => {
+    const k = 11;
+    const blob: Poly = Array.from({ length: k }, (_, j) => {
+      const angle = ((j + (random() - 0.5) * 0.5) / k) * Math.PI * 2;
+      const r = R * (0.88 + random() * 0.24);
+      return [cx + Math.cos(angle) * r, cy + Math.sin(angle) * r];
+    });
+    const cell = photoVoronoi.cellPolygon(i);
+    const inBand = largest(intersect(blob, band));
+    return cell && inBand ? largest(intersect(cell.slice(0, -1) as Poly, [inBand])) : inBand;
+  });
+  const reserved = photoRegions.filter((p): p is Poly => !!p);
+
+  // 4. Graines des petites dalles : échantillonnage de Poisson par « lancer de
+  //    fléchettes » (tirage au hasard, rejet si trop près d'une graine existante),
+  //    hors des dalles photo.
+  const keepOut = offset(reserved, cfg.espacement * 0.35);
   const fill: Pt[] = [];
   const margin = cfg.espacement * 1.5;
-  for (let tries = 0; tries < 40000; tries++) {
+  for (let tries = 0; tries < 60000; tries++) {
     const p: Pt = [-margin + random() * (W + 2 * margin), -margin + random() * (H + 2 * margin)];
-    if (!inside(p, sampleZone)) continue;
-    if (points.some((b) => Math.hypot(p[0] - b[0], p[1] - b[1]) < cfg.degagementPhoto)) continue;
+    if (!inside(p, sampleZone) || inside(p, keepOut)) continue;
     if (fill.some((f) => Math.hypot(p[0] - f[0], p[1] - f[1]) < cfg.espacement)) continue;
     fill.push(p);
   }
 
-  // 4. Voronoï : cellule i = zone plus proche de la graine i que de toute autre.
-  const seeds: Pt[] = [...points, ...fill];
-  const pad = Math.max(W, H);
-  const voronoi = Delaunay.from(seeds).voronoi([-pad, -pad, W + pad, H + pad]);
-
-  // 5. Découpe, joints, arrondis.
-  const stones: Stone[] = [];
-  const pct = (v: number, of: number) => +((v / of) * 100).toFixed(3);
-  seeds.forEach((_, i) => {
+  // 5. Voronoï des petites graines ; bords cassés ; on garde ce qui est dans
+  //    l'allée MOINS les dalles photo → l'ensemble pave l'allée sans trou.
+  const voronoi = Delaunay.from(fill).voronoi([-pad, -pad, W + pad, H + pad]);
+  const fillerPieces: Poly[] = [];
+  fill.forEach((_, i) => {
     const cell = voronoi.cellPolygon(i);
     if (!cell) return;
-    const clipped = largest(intersect(cell.slice(0, -1) as Poly, band));
-    if (!clipped) return;
-    const shrunk = offset([clipped], -(cfg.joint / 2 + cfg.arrondi), ClipperLib.JoinType.jtMiter);
-    const stone = largest(offset(shrunk, cfg.arrondi));
-    if (!stone || area(stone) < cfg.espacement * cfg.espacement * 0.15) return;
+    const rough = roughen(cell.slice(0, -1) as Poly, cfg.decoupe, cfg.graine);
+    for (const piece of intersect(rough, band)) fillerPieces.push(...difference(piece, reserved));
+  });
 
+  // 6. Joints (rétrécissement constant) et angles arrondis, puis sortie en %.
+  const stones: Stone[] = [];
+  const pct = (v: number, of: number) => +((v / of) * 100).toFixed(3);
+  const finish = (region: Poly) => {
+    const shrunk = offset([region], -(cfg.joint / 2 + cfg.arrondi), ClipperLib.JoinType.jtMiter);
+    const stone = largest(offset(shrunk, cfg.arrondi));
+    return stone && area(stone) >= cfg.espacement * cfg.espacement * 0.12 ? stone : null;
+  };
+  const toStone = (stone: Poly, photoIndex?: number): Stone => {
     const xs = stone.map((p) => p[0]), ys = stone.map((p) => p[1]);
     const [x0, y0, x1, y1] = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
     const bw = x1 - x0, bh = y1 - y0;
     const clip = (p: Poly) => p.map(([x, y]) => `${pct(x - x0, bw)}% ${pct(y - y0, bh)}%`).join(", ");
-
     const s: Stone = { left: pct(x0, W), top: pct(y0, H), width: pct(bw, W), height: pct(bh, H), clip: clip(stone) };
-    if (i < points.length) {
+    if (photoIndex !== undefined) {
       const inner = largest(offset([stone], -cfg.lisere)) ?? stone;
       const core = largest(offset([stone], -bw * 0.18)) ?? stone;
       const [lx, ly] = centroid(core);
-      s.photo = { index: i, clipInner: clip(inner), labelX: pct(lx - x0, bw), labelY: pct(ly - y0, bh) };
+      s.photo = { index: photoIndex, clipInner: clip(inner), labelX: pct(lx - x0, bw), labelY: pct(ly - y0, bh) };
     }
-    stones.push(s);
+    return s;
+  };
+
+  photoRegions.forEach((region, i) => {
+    const stone = region && finish(region);
+    if (stone) stones.push(toStone(stone, i));
   });
+  for (const piece of fillerPieces) {
+    const stone = finish(piece);
+    if (stone) stones.push(toStone(stone));
+  }
 
   const bandPath = band.map((p) => "M" + p.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join("L") + "Z").join(" ");
   return { width: W, height: H, bandPath, stones };
