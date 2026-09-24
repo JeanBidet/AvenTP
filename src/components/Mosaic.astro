@@ -29,18 +29,9 @@ const box = (s: { left: number; top: number; width: number; height: number }) =>
 ---
 
 <div
-  class:list={["lawn relative w-full overflow-hidden [container-type:inline-size]", className]}
+  class:list={["relative w-full overflow-hidden bg-ink [container-type:inline-size]", className]}
   style={`aspect-ratio:${m.width} / ${m.height}`}
 >
-  <svg
-    aria-hidden="true"
-    class="absolute inset-0 size-full"
-    viewBox={`0 0 ${m.width} ${m.height}`}
-    preserveAspectRatio="none"
-  >
-    <path d={m.bandPath} fill="#2b2722" stroke="#3d372f" stroke-width="10" />
-  </svg>
-
   {m.stones.map((s) => {
     if (!s.photo) {
       return (

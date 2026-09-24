@@ -80,14 +80,7 @@
   .js .reveal.is-visible { animation: none; }
 }
 
-/* Textures de l'allée en mosaïque (dessinées en CSS, aucune image chargée) */
-.lawn {
-  background-color: #0f2419;
-  background-image:
-    radial-gradient(circle at 30% 30%, #1c4430 0 1.2px, transparent 1.6px),
-    radial-gradient(circle at 70% 60%, #15331f 0 1px, transparent 1.4px);
-  background-size: 9px 9px, 13px 13px;
-}
+/* Texture de pierre des dalles de la mosaïque (dessinée en CSS, aucune image chargée) */
 .stone-flat {
   background-color: #a7a092;
   background-image:

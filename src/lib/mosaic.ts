@@ -55,8 +55,6 @@ export interface Stone {
 export interface Mosaic {
   width: number;
   height: number;
-  /** Contour de l'allée (attribut d d'un <path> SVG, en unités de dessin) */
-  bandPath: string;
   stones: Stone[];
 }
 
@@ -284,6 +282,5 @@ export function generateMosaic(cfg: MosaicConfig): Mosaic {
     if (stone) stones.push(toStone(stone));
   }
 
-  const bandPath = band.map((p) => "M" + p.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join("L") + "Z").join(" ");
-  return { width: W, height: H, bandPath, stones };
+  return { width: W, height: H, stones };
 }
