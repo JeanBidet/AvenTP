@@ -1,0 +1,100 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import CtaBand from "../components/CtaBand.astro";
+import { categories, type Category } from "../data/site";
+
+const projects = (await getCollection("realisations")).sort((a, b) => a.data.order - b.data.order);
+
+// Compteurs calculés au build à partir des fiches : ajouter un fichier Markdown suffit.
+const count = (c: Category) => projects.filter((p) => p.data.category === c).length;
+const filters = [
+  { id: "tous", label: "Tous", count: projects.length },
+  ...(Object.entries(categories) as [Category, string][]).map(([id, label]) => ({ id, label, count: count(id) })),
+];
+---
+
+<BaseLayout title="Réalisations" description="Allées, terrasses, jardins, clôtures, piscines : les chantiers réalisés par AvenTP.">
+  <section class="border-b border-neutral-800 pt-16 pb-8 lg:pt-24 lg:pb-12">
+    <div class="container-site flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+      <div class="flex flex-col gap-4">
+        <p class="eyebrow">Réalisations</p>
+        <h1 class="font-display text-[44px] leading-none font-bold tracking-tighter lg:text-[64px]">Nos chantiers</h1>
+      </div>
+      <p class="max-w-[460px] text-[17px] text-muted">
+        Allées, terrasses, jardins, clôtures, piscines : un aperçu des extérieurs que nous avons aménagés.
+      </p>
+    </div>
+  </section>
+
+  <div class="container-site" data-filters>
+    <div class="flex flex-col items-start gap-6 py-10 lg:flex-row lg:items-center lg:justify-between">
+      <div role="group" aria-label="Filtrer par type de réalisation" class="flex flex-wrap gap-2.5">
+        {filters.map((f) => (
+          <button
+            type="button"
+            data-filter={f.id}
+            aria-pressed={f.id === "tous" ? "true" : "false"}
+            class="group inline-flex min-h-12 cursor-pointer items-center gap-2.5 rounded-full border border-line-strong bg-ink px-5 text-[15px] font-semibold transition-colors hover:border-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-ink"
+          >
+            {f.label}
+            <span class="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300 group-aria-pressed:bg-ink group-aria-pressed:text-accent">
+              {f.count}
+            </span>
+          </button>
+        ))}
+      </div>
+      <p data-filter-count aria-live="polite" class="text-[15px] text-faint">{projects.length} réalisations</p>
+    </div>
+
+    <ul class="grid gap-x-6 gap-y-12 pb-20 sm:grid-cols-2 lg:grid-cols-3 lg:pb-30">
+      {projects.map((p, i) => (
+        <li data-category={p.data.category} class="reveal">
+          <ProjectCard project={p} showTag imgClass="h-[320px] rounded-2xl" eager={i < 3} />
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <CtaBand title="Un projet similaire ?">
+    Décrivez-nous votre terrain et vos envies, nous revenons vers vous avec un devis.
+  </CtaBand>
+</BaseLayout>
+
+<script>
+  // Filtres : on masque (attribut hidden) les cartes dont la catégorie ne correspond pas.
+  // Le filtre est reflété dans l'URL (#allees) : lien partageable depuis l'accueil.
+  document.addEventListener("astro:page-load", () => {
+    const root = document.querySelector<HTMLElement>("[data-filters]");
+    if (!root) return;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+    const items = [...root.querySelectorAll<HTMLElement>("[data-category]")];
+    const counter = root.querySelector("[data-filter-count]")!;
+
+    const apply = (filter: string) => {
+      let shown = 0;
+      for (const it of items) {
+        const visible = filter === "tous" || it.dataset.category === filter;
+        it.hidden = !visible;
+        if (visible) {
+          shown++;
+          it.classList.add("is-visible"); // pas d'animation en attente sur une carte révélée par filtre
+        }
+      }
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.filter === filter)));
+      counter.textContent = `${shown} réalisation${shown > 1 ? "s" : ""}`;
+    };
+
+    for (const b of buttons) {
+      b.addEventListener("click", () => {
+        const f = b.dataset.filter!;
+        apply(f);
+        history.replaceState(history.state, "", f === "tous" ? location.pathname : `#${f}`);
+      });
+    }
+
+    const fromHash = location.hash.slice(1);
+    apply(buttons.some((b) => b.dataset.filter === fromHash) ? fromHash : "tous");
+  });
+</script>

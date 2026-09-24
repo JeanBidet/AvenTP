@@ -1,0 +1,45 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import { categories } from "../data/site";
+
+interface Props {
+  project: CollectionEntry<"realisations">;
+  /** Affiche l'étiquette de catégorie sur la photo */
+  showTag?: boolean;
+  /** Hauteur de la photo (classe Tailwind) */
+  imgClass?: string;
+  /** Première image visible : chargée en priorité */
+  eager?: boolean;
+}
+
+const { project, showTag = false, imgClass = "h-[300px] rounded-lg", eager = false } = Astro.props;
+const { title, category, city, year, image, alt } = project.data;
+---
+
+<figure class="m-0 flex flex-col gap-3.5">
+  <div class="relative overflow-hidden rounded-[inherit]">
+    <!--
+      <Image> (astro:assets) génère plusieurs tailles en WebP au build ;
+      « sizes » dit au navigateur quelle largeur la carte occupe selon l'écran,
+      il télécharge alors la plus petite image suffisante.
+    -->
+    <Image
+      src={image}
+      alt={alt}
+      widths={[400, 640, 960]}
+      sizes="(min-width: 1024px) 420px, (min-width: 640px) 50vw, 100vw"
+      loading={eager ? "eager" : "lazy"}
+      class:list={["w-full object-cover", imgClass]}
+    />
+    {showTag && (
+      <span class="absolute top-4 left-4 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold tracking-wider text-accent uppercase">
+        {categories[category]}
+      </span>
+    )}
+  </div>
+  <figcaption class="flex flex-col gap-1">
+    <span class="text-[17px] font-semibold">{title}</span>
+    <span class="text-sm text-faint">{city} · {year}</span>
+  </figcaption>
+</figure>

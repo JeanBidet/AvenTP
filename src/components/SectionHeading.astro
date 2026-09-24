@@ -1,0 +1,17 @@
+---
+/** Titre de section : sur-titre turquoise + h2, et à droite un slot (texte, liens, boutons). */
+interface Props {
+  eyebrow: string;
+  title: string;
+  id?: string;
+}
+const { eyebrow, title, id } = Astro.props;
+---
+
+<div class="mb-10 flex flex-col gap-5 lg:mb-14 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+  <div class="flex flex-col gap-3.5">
+    <p class="eyebrow">{eyebrow}</p>
+    <h2 id={id} class="font-display text-[34px] leading-tight font-bold tracking-tight lg:text-[44px]">{title}</h2>
+  </div>
+  <slot />
+</div>

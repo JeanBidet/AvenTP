@@ -1,0 +1,16 @@
+---
+import { site } from "../data/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-surface">
+  <div class="container-site">
+    <div class="flex flex-wrap justify-between gap-6 border-t border-neutral-800 py-8 text-sm text-neutral-400">
+      <span>© {year} {site.name} — Paysagisme &amp; Terrassement</span>
+      <nav aria-label="Informations légales" class="flex gap-7">
+        <a href="#" class="hover:text-accent">Mentions légales</a>
+        <a href="#" class="hover:text-accent">Politique de confidentialité</a>
+      </nav>
+    </div>
+  </div>
+</footer>

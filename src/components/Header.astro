@@ -1,0 +1,104 @@
+---
+import Icon from "./Icon.astro";
+import { nav, site } from "../data/site";
+
+// Lien actif : comparaison du chemin courant (sans « / » final) avec chaque lien.
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isCurrent = (href: string) => !href.includes("#") && href === path;
+---
+
+<header class="sticky top-0 z-50 border-b border-neutral-800 bg-ink">
+  <div class="container-site flex h-18 items-center justify-between gap-6 lg:h-24">
+    <a href="/" class="flex items-center gap-3 hover:text-white" aria-label={`${site.name} — accueil`}>
+      <span class="grid size-10 place-items-center rounded-lg bg-accent text-ink">
+        <Icon name="logo" class="size-6" strokeWidth={2} />
+      </span>
+      <span class="font-display text-[26px] font-bold tracking-tight">{site.name}</span>
+    </a>
+
+    <!--
+      Mobile : la nav est un panneau caché sous l'en-tête (data-open="false").
+      Desktop (lg) : toujours visible, en ligne.
+    -->
+    <nav
+      id="site-nav"
+      aria-label="Navigation principale"
+      data-open="false"
+      class="fixed inset-x-0 top-18 hidden flex-col gap-6 border-b border-neutral-800 bg-ink px-6 pt-4 pb-8 data-[open=true]:flex lg:static lg:flex lg:flex-row lg:items-center lg:gap-10 lg:border-0 lg:p-0"
+    >
+      <ul class="flex flex-col text-lg font-medium lg:flex-row lg:gap-8 lg:text-[15px]">
+        {nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={isCurrent(item.href) ? "page" : undefined}
+              class="block border-b border-neutral-900 py-3.5 transition-colors hover:text-accent aria-[current=page]:text-accent lg:border-b-2 lg:border-transparent lg:py-3 lg:aria-[current=page]:border-accent lg:aria-[current=page]:text-white"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <span class="hidden h-7 w-px bg-neutral-800 lg:block" aria-hidden="true"></span>
+
+      <ul class="flex gap-1">
+        {site.socials.map((s) => (
+          <li>
+            <a href={s.href} aria-label={s.name} class="grid size-11 place-items-center hover:text-accent">
+              <Icon name={s.icon} />
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <a href="/#contact" class="btn-accent min-h-11 self-start px-5 text-[15px]">
+        <Icon name="phone" class="size-4.5" strokeWidth={2} />
+        Nous contacter
+      </a>
+    </nav>
+
+    <button
+      type="button"
+      class="grid size-12 cursor-pointer place-items-center rounded-md border border-line-strong lg:hidden"
+      aria-controls="site-nav"
+      aria-expanded="false"
+      aria-label="Ouvrir le menu"
+      data-nav-toggle
+    >
+      <Icon name="menu" class="size-6" strokeWidth={2} />
+    </button>
+  </div>
+</header>
+
+<script>
+  // Menu mobile. « astro:page-load » se déclenche à chaque navigation
+  // (les View Transitions ne rechargent pas la page, donc pas de DOMContentLoaded).
+  document.addEventListener("astro:page-load", () => {
+    const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+    const nav = document.getElementById("site-nav");
+    if (!toggle || !nav) return;
+
+    const setOpen = (open: boolean) => {
+      nav.dataset.open = String(open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "Fermer le menu" : "Ouvrir le menu");
+    };
+
+    toggle.addEventListener("click", () => setOpen(nav.dataset.open !== "true"));
+    nav.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) setOpen(false);
+    });
+  });
+
+  // Enregistré une seule fois (document survit aux navigations) : Échap ferme le menu.
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const nav = document.getElementById("site-nav");
+    const toggle = document.querySelector("[data-nav-toggle]");
+    if (nav?.dataset.open !== "true") return;
+    nav.dataset.open = "false";
+    toggle?.setAttribute("aria-expanded", "false");
+    toggle?.setAttribute("aria-label", "Ouvrir le menu");
+  });
+</script>

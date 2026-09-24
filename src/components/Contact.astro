@@ -1,0 +1,62 @@
+---
+import Icon from "./Icon.astro";
+import { site } from "../data/site";
+
+const field =
+  "w-full rounded-md border border-neutral-700 bg-ink px-4 py-3.5 text-base text-white focus:border-accent focus:outline-none";
+const label = "flex flex-col gap-2 text-sm text-neutral-300";
+---
+
+<section id="contact" class="bg-surface pt-20 pb-16 lg:pt-28" aria-labelledby="contact-title">
+  <div class="container-site grid gap-14 lg:grid-cols-2 lg:gap-24">
+    <div class="flex flex-col gap-9">
+      <div class="flex flex-col gap-3.5">
+        <p class="eyebrow">Contact</p>
+        <h2 id="contact-title" class="font-display text-[34px] font-bold tracking-tight lg:text-[44px]">Parlons de votre projet</h2>
+      </div>
+
+      <address class="flex flex-col gap-5 text-[17px] not-italic">
+        <a href={site.phoneHref} class="flex items-center gap-4"><Icon name="phone" class="size-5.5 text-accent" />{site.phone}</a>
+        <a href={`mailto:${site.email}`} class="flex items-center gap-4"><Icon name="mail" class="size-5.5 text-accent" />{site.email}</a>
+        <span class="flex items-center gap-4"><Icon name="pin" class="size-5.5 text-accent" />{site.address}</span>
+      </address>
+
+      <div class="flex flex-col gap-3.5">
+        <p class="text-sm text-neutral-400">Suivez nos chantiers</p>
+        <ul class="flex gap-3">
+          {site.socials.map((s) => (
+            <li>
+              <a href={s.href} aria-label={s.name}
+                class="grid size-12 place-items-center rounded-full border border-line-strong transition-colors hover:border-accent hover:text-accent">
+                <Icon name={s.icon} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <!--
+      Le site est statique : pas de serveur pour recevoir le formulaire.
+      Brancher « action » sur un service (Formspree, Netlify Forms, Web3Forms…)
+      ou sur une API maison le jour de la mise en ligne.
+    -->
+    <form class="flex flex-col gap-5" method="post" action="#">
+      <div class="grid gap-5 sm:grid-cols-2">
+        <label class={label}>Nom
+          <input class={field} type="text" name="name" autocomplete="name" required />
+        </label>
+        <label class={label}>Téléphone
+          <input class={field} type="tel" name="phone" autocomplete="tel" />
+        </label>
+      </div>
+      <label class={label}>Email
+        <input class={field} type="email" name="email" autocomplete="email" required />
+      </label>
+      <label class={label}>Votre projet
+        <textarea class:list={[field, "min-h-36 resize-y"]} name="message" rows="5" required></textarea>
+      </label>
+      <button type="submit" class="btn-accent self-start">Envoyer la demande</button>
+    </form>
+  </div>
+</section>

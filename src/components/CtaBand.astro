@@ -1,0 +1,17 @@
+---
+interface Props {
+  title: string;
+  id?: string;
+}
+const { title, id } = Astro.props;
+---
+
+<section id={id} class="bg-accent py-16 text-ink">
+  <div class="container-site flex flex-col items-start gap-7 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+    <div class="flex max-w-[820px] flex-col gap-3">
+      <h2 class="font-display text-3xl font-bold tracking-tight lg:text-4xl">{title}</h2>
+      <p class="text-[17px]"><slot /></p>
+    </div>
+    <a href="/#contact" class="btn-dark">Demander un devis</a>
+  </div>
+</section>
