@@ -22,6 +22,10 @@ export interface MosaicConfig {
   height: number;
   /** Points de passage de l'allée ; une photo est centrée sur chacun */
   points: [number, number][];
+  /** Optionnel : d'où vient l'allée (avant la 1re photo) et où elle va (après la dernière).
+   *  Un point hors cadre (ex. y < 0) fait « sortir » l'allée de la zone : continuité avec la section voisine. */
+  depart?: [number, number];
+  arrivee?: [number, number];
   /** Largeur de l'allée */
   largeur: number;
   /** Distance minimale entre graines de remplissage (≈ taille des petites dalles) */
@@ -194,10 +198,11 @@ export function generateMosaic(cfg: MosaicConfig): Mosaic {
   const random = rng(cfg.graine);
 
   // 1-2. Allée : courbe prolongée hors cadre aux deux bouts, puis épaissie.
-  const [first, second] = [points[0], points[1] ?? points[0]];
-  const [last, beforeLast] = [points[points.length - 1], points[points.length - 2] ?? points[0]];
+  const path: Pt[] = [...(cfg.depart ? [cfg.depart] : []), ...points, ...(cfg.arrivee ? [cfg.arrivee] : [])];
+  const [first, second] = [path[0], path[1] ?? path[0]];
+  const [last, beforeLast] = [path[path.length - 1], path[path.length - 2] ?? path[0]];
   const extend = (a: Pt, b: Pt): Pt => [a[0] + (a[0] - b[0]) * 1.2, a[1] + (a[1] - b[1]) * 1.2];
-  const curve = catmullRom([extend(first, second), ...points, extend(last, beforeLast)]);
+  const curve = catmullRom([extend(first, second), ...path, extend(last, beforeLast)]);
 
   const co = new ClipperLib.ClipperOffset(2, 0.25 * SCALE);
   co.AddPath(toPath(curve), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenButt);

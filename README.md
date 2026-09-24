@@ -74,12 +74,18 @@ Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `
 | Réglage | Effet |
 |---|---|
 | `points` | tracé de l'allée ; une photo est centrée sur chaque point (5 points = 5 types) |
+| `depart`, `arrivee` | optionnels : d'où vient l'allée et où elle va ; un point hors cadre (y < 0) la fait sortir de la zone |
 | `largeur` | épaisseur de l'allée |
 | `espacement` | taille des petites dalles (plus grand = moins de dalles, plus grosses) |
 | `degagementPhoto` | taille des dalles photo (diamètre ≈ 1,25 × la valeur) |
 | `decoupe` | irrégularité des bords : `0` = polygones droits, `0.25` = pierres très découpées |
 | `joint`, `arrondi`, `lisere` | largeur des joints, arrondi des angles, bord de pierre autour des photos |
 | `graine` | autre tirage aléatoire des petites dalles pour la même forme |
+
+Sur grand écran, la zone commence 360 unités plus haut que la section : l'allée remonte
+dans la photo d'accueil (marge négative `lg:-mt-[13.9%]` dans `index.astro`, fondu `fadeTop`)
+et le titre est placé dans le creux entre les deux branches (`lg:top-[21%]`). Si vous
+déplacez fortement les points, ajustez ces deux valeurs.
 
 Modifier une valeur puis `npm run dev` : la page se recalcule. Exemple, une diagonale :
 `points: [[150, 750], [450, 600], [750, 450], [1050, 300], [1320, 150]]`.
