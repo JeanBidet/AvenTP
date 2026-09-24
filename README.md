@@ -26,6 +26,8 @@ src/
 ├─ content/realisations/  un fichier Markdown par chantier
 ├─ content.config.ts      schéma des fiches chantier (validé au build)
 ├─ data/site.ts           coordonnées, réseaux sociaux, menu, catégories
+├─ data/mosaic.ts         forme de l'allée en mosaïque (accueil)
+├─ lib/mosaic.ts          générateur de la mosaïque (Voronoï), exécuté au build
 ├─ layouts/BaseLayout.astro  <head>, en-tête, pied de page, transitions
 ├─ pages/                 une page = une URL (index → /, realisations → /realisations)
 └─ styles/global.css      thème Tailwind (couleurs, polices) et utilitaires maison
@@ -52,6 +54,32 @@ src/
 La page Réalisations, ses filtres et leurs compteurs se mettent à jour
 automatiquement. Une catégorie inconnue ou une image introuvable fait échouer
 le build avec un message explicite.
+
+## Modifier l'allée en mosaïque
+
+La section « Ce que nous réalisons » est une allée de dalles qui s'emboîtent,
+**calculée au build** par `src/lib/mosaic.ts` :
+
+1. une spline de Catmull-Rom passe par les `points` ; épaissie de `largeur`, elle donne l'allée ;
+2. des graines de remplissage sont tirées par échantillonnage de Poisson
+   (au moins `espacement` entre elles, au moins `degagementPhoto` des points photo) ;
+3. le diagramme de Voronoï de toutes les graines (`d3-delaunay`) pave l'allée sans trou ;
+4. chaque cellule est rétrécie de la moitié du `joint` puis arrondie (`clipper-lib`) ;
+5. les polygones deviennent des `clip-path` en pourcentages, donc la mosaïque s'adapte à l'écran.
+
+Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `alleeMobile`.
+
+| Réglage | Effet |
+|---|---|
+| `points` | tracé de l'allée ; une photo est centrée sur chaque point (5 points = 5 types) |
+| `largeur` | épaisseur de l'allée |
+| `espacement` | taille des petites dalles (plus grand = moins de dalles, plus grosses) |
+| `degagementPhoto` | taille des dalles photo |
+| `joint`, `arrondi`, `lisere` | largeur des joints, arrondi des angles, bord de pierre autour des photos |
+| `graine` | autre tirage aléatoire des petites dalles pour la même forme |
+
+Modifier une valeur puis `npm run dev` : la page se recalcule. Exemple, une diagonale :
+`points: [[150, 750], [450, 600], [750, 450], [1050, 300], [1320, 150]]`.
 
 ## Thème
 

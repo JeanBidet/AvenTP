@@ -79,3 +79,20 @@
   .js .reveal { opacity: 1; }
   .js .reveal.is-visible { animation: none; }
 }
+
+/* Textures de l'allée en mosaïque (dessinées en CSS, aucune image chargée) */
+.lawn {
+  background-color: #0f2419;
+  background-image:
+    radial-gradient(circle at 30% 30%, #1c4430 0 1.2px, transparent 1.6px),
+    radial-gradient(circle at 70% 60%, #15331f 0 1px, transparent 1.4px);
+  background-size: 9px 9px, 13px 13px;
+}
+.stone-flat {
+  background-color: #a7a092;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(255 255 255 / 0.12) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 70%, rgb(0 0 0 / 0.12) 0 2px, transparent 3px),
+    linear-gradient(135deg, #bbb5a7, #8d8678);
+  background-size: 23px 23px, 31px 31px, 100% 100%;
+}

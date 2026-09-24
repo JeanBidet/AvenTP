@@ -1,0 +1,82 @@
+---
+/**
+ * Allée en mosaïque : chaque réalisation type est une dalle photo,
+ * les autres dalles sont en pierre. La géométrie est calculée au build
+ * (src/lib/mosaic.ts) à partir de la configuration (src/data/mosaic.ts).
+ */
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import { generateMosaic, type MosaicConfig } from "../lib/mosaic";
+
+export interface MosaicItem {
+  title: string;
+  text: string;
+  href: string;
+  img: ImageMetadata;
+  alt: string;
+}
+
+interface Props {
+  config: MosaicConfig;
+  items: MosaicItem[];
+  class?: string;
+}
+
+const { config, items, class: className } = Astro.props;
+const m = generateMosaic(config);
+const box = (s: { left: number; top: number; width: number; height: number }) =>
+  `left:${s.left}%;top:${s.top}%;width:${s.width}%;height:${s.height}%`;
+---
+
+<div
+  class:list={["lawn relative w-full overflow-hidden [container-type:inline-size]", className]}
+  style={`aspect-ratio:${m.width} / ${m.height}`}
+>
+  <svg
+    aria-hidden="true"
+    class="absolute inset-0 size-full"
+    viewBox={`0 0 ${m.width} ${m.height}`}
+    preserveAspectRatio="none"
+  >
+    <path d={m.bandPath} fill="#2b2722" stroke="#3d372f" stroke-width="10" />
+  </svg>
+
+  {m.stones.map((s) => {
+    if (!s.photo) {
+      return (
+        <div aria-hidden="true" class="absolute drop-shadow-[0_5px_6px_rgba(0,0,0,0.5)]" style={box(s)}>
+          <div class="stone-flat size-full" style={`clip-path:polygon(${s.clip})`} />
+        </div>
+      );
+    }
+    const item = items[s.photo.index];
+    if (!item) return null;
+    const num = String(s.photo.index + 1).padStart(2, "0");
+    return (
+      <a
+        href={item.href}
+        class="group absolute block drop-shadow-[0_5px_6px_rgba(0,0,0,0.5)] hover:text-white"
+        style={box(s)}
+      >
+        <div class="stone-flat absolute inset-0" style={`clip-path:polygon(${s.clip})`} />
+        <div class="absolute inset-0 overflow-hidden" style={`clip-path:polygon(${s.photo.clipInner})`}>
+          <Image
+            src={item.img}
+            alt={item.alt}
+            widths={[400, 640, 900]}
+            sizes="(min-width: 768px) 32vw, 90vw"
+            class="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        </div>
+        <span
+          class="absolute flex -translate-x-1/2 -translate-y-1/2 items-baseline gap-2.5 rounded-full bg-ink px-[1.1em] py-[0.55em] whitespace-nowrap transition-colors group-hover:bg-accent"
+          style={`left:${s.photo.labelX}%;top:${s.photo.labelY}%;font-size:clamp(14px, 1.55cqw, 22px)`}
+        >
+          <span class="font-display text-[0.65em] font-semibold text-accent group-hover:text-ink">{num}</span>
+          <span class="font-display leading-tight font-bold group-hover:text-ink">{item.title}</span>
+          <span class="sr-only">— {item.text}</span>
+        </span>
+      </a>
+    );
+  })}
+</div>
