@@ -45,25 +45,33 @@ export const allee: MosaicConfig = {
 };
 
 /**
- * Moins de 1280 px : allée verticale qui descend en serpentant, étirée à la largeur
- * disponible (`taille="elastique"`). Plus large que la zone (390 pour 400), elle est
- * pleine largeur, entre par le bord haut et sort par le bord bas de la section.
+ * Moins de 1280 px : allée verticale qui descend en serpentant, elle aussi dessinée à
+ * l'échelle 1:1 (`taille="fixe"`) — les unités sont donc des pixels réels et les dalles
+ * gardent la même taille d'un téléphone à l'autre.
+ *
+ * La zone fait 1280 de large, centrée et rognée ; l'allée n'en occupe que 480 au milieu
+ * (x de 400 à 880). Un chemin vertical ne peut pas être pleine largeur à toutes les
+ * largeurs d'écran à échelle fixe : il l'est jusqu'à 480 px, ce qui couvre les
+ * téléphones, et au-delà il est centré avec du fond noir de part et d'autre.
+ *
+ * `depart` et `arrivee` sont au-dessus et en dessous de la zone : l'allée entre par le
+ * bord haut de la section et sort par le bord bas.
  */
 export const alleeMobile: MosaicConfig = {
-  width: 400,
+  width: 1280,
   height: 1640,
-  depart: [200, -240],
+  depart: [640, -260],
   points: [
-    [185, 200],
-    [215, 510],
-    [185, 820],
-    [215, 1130],
-    [185, 1440],
+    [620, 200],
+    [660, 510],
+    [620, 820],
+    [660, 1130],
+    [620, 1440],
   ],
-  arrivee: [200, 1880],
-  largeur: 300,
+  arrivee: [640, 1900],
+  largeur: 450,
   espacement: 56,
-  degagementPhoto: 190,
+  degagementPhoto: 240,
   joint: 9,
   arrondi: 4,
   lisere: 7,

@@ -88,15 +88,17 @@ Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 1280 px) et 
 
 ### Deux échelles
 
-Le composant `Mosaic` prend une prop `taille` :
+Le composant `Mosaic` prend une prop `taille`. **Les deux allées utilisent `"fixe"`.**
 
-- `taille="fixe"` (l'allée horizontale) : la zone est posée à sa taille **en pixels**,
-  centrée, et rognée par la largeur de l'écran. Les unités de la config sont donc des
-  pixels réels. Les dalles gardent la même taille partout, et un écran plus large montre
-  une allée **plus longue, avec plus de pavés** — de 63 dalles vues à 1280 px à 124 à
-  2560 px. La section garde une hauteur constante de `height` pixels.
-- `taille="elastique"` (l'allée verticale) : la zone s'étire à la largeur disponible et
-  tout grossit ensemble, dalles photo comprises.
+- `taille="fixe"` : la zone est posée à sa taille **en pixels**, centrée, et rognée par la
+  largeur de l'écran. Les unités de la config sont donc des pixels réels. Les dalles
+  gardent la même taille partout, et un écran plus large montre **plus d'allée**, pas une
+  allée plus grosse : de 63 dalles vues à 1280 px à 124 à 2560 px sur l'horizontale, de 70
+  à 101 entre 320 et 480 px sur la verticale. La section garde une hauteur constante de
+  `height` pixels — la verticale mesurait sinon 1 600 px de haut sur un téléphone mais
+  5 200 px à 1 279 px de large.
+- `taille="elastique"` : la zone s'étire à la largeur disponible et tout grossit ensemble,
+  dalles photo comprises. Plus utilisé, gardé pour comparaison.
 
 C'est ce qui fixe le palier `xl` (1280 px) entre les deux allées dans `index.astro` :
 à l'échelle 1:1, cinq dalles photo de ~220 px ne tiennent pas dans une fenêtre plus
@@ -113,8 +115,11 @@ continue en pavés jusqu'aux bords.
 - en échelle fixe, garder les dalles photo dans la fenêtre la plus étroite prévue
   (ici x de 640 à 1920), sinon elles sortent du champ sur les petits écrans.
 
-Sur mobile l'allée est volontairement plus large que la zone (390 pour 400) : elle est
-pleine largeur, coupée sur ses deux flancs, et entre par le haut et sort par le bas.
+L'allée verticale entre par le bord haut de la section et sort par le bord bas. Elle
+n'occupe que 490 px au milieu d'une zone de 1280, donc elle est pleine largeur jusqu'à
+480 px d'écran — ce qui couvre les téléphones — et au-delà elle est centrée avec du fond
+noir de part et d'autre. À échelle fixe, un chemin vertical ne peut pas être pleine
+largeur à toutes les largeurs d'écran : c'est le compromis retenu.
 
 Modifier une valeur puis `npm run dev` : la page se recalcule.
 
