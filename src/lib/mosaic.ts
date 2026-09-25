@@ -22,6 +22,13 @@ export interface MosaicConfig {
   height: number;
   /** Points de passage de l'allée ; une photo est centrée sur chacun */
   points: [number, number][];
+  /**
+   * Par où l'allée entre et sort, hors de la zone (x < 0, x > width, y < 0 ou y > height) :
+   * elle est alors tranchée net par ce bord, comme si elle continuait au-delà de la page.
+   * Omis : la courbe est prolongée dans l'axe des points extrêmes jusqu'à sortir.
+   */
+  depart?: [number, number];
+  arrivee?: [number, number];
   /** Largeur de l'allée */
   largeur: number;
   /** Distance minimale entre graines de remplissage (≈ taille des petites dalles) */
@@ -193,10 +200,11 @@ export function generateMosaic(cfg: MosaicConfig): Mosaic {
   const { width: W, height: H, points } = cfg;
   const random = rng(cfg.graine);
 
-  // 1-2. Allée : courbe prolongée un peu au-delà des deux points extrêmes, puis épaissie.
-  //      Le bout est arrondi (etOpenRound) et le prolongement est borné pour que le
-  //      demi-disque du bout tienne dans le cadre : l'allée se termine donc par un arc
-  //      à l'intérieur de la zone, au lieu d'être tranchée à plat par son bord.
+  // 1-2. Allée : la courbe part de `depart` et finit à `arrivee`, tous deux hors de la
+  //      zone, puis elle est épaissie. Son bout (arrondi) est donc entièrement dehors :
+  //      ce que l'on voit au bord de la page est une coupe franche, comme si l'allée
+  //      continuait au-delà. Sans `depart`/`arrivee`, la courbe est prolongée dans l'axe
+  //      des deux points extrêmes, assez loin pour sortir complètement de la zone.
   const [first, second] = [points[0], points[1] ?? points[0]];
   const [last, beforeLast] = [points[points.length - 1], points[points.length - 2] ?? points[0]];
   const capR = cfg.largeur / 2 + cfg.joint; // rayon du bout, plus une marge de joint
@@ -204,19 +212,18 @@ export function generateMosaic(cfg: MosaicConfig): Mosaic {
     const [dx, dy] = [a[0] - b[0], a[1] - b[1]];
     const len = Math.hypot(dx, dy) || 1;
     const [ux, uy] = [dx / len, dy / len]; // direction de sortie, unitaire
-    // Distance parcourable sur un axe avant que le disque du bout n'en sorte.
-    // Un axe trop étroit pour le contenir (allée pleine largeur sur mobile) ne
-    // contraint rien : de ce côté l'allée est volontairement coupée par le bord.
-    const room = (pos: number, u: number, size: number) => {
-      if (size < 2 * capR) return Infinity;
-      if (u > 0) return (size - capR - pos) / u;
-      if (u < 0) return (capR - pos) / u;
-      return Infinity;
-    };
-    const d = Math.max(0, Math.min(cfg.degagementPhoto * 0.5, room(a[0], ux, W), room(a[1], uy, H)));
+    // Distance jusqu'au bord franchi le premier, plus le rayon du bout : tout le
+    // demi-disque passe ainsi dehors et la coupe visible est une droite.
+    const toBorder = (pos: number, u: number, size: number) =>
+      u > 0 ? (size - pos) / u : u < 0 ? -pos / u : Infinity;
+    const d = Math.min(toBorder(a[0], ux, W), toBorder(a[1], uy, H)) + capR;
     return [a[0] + ux * d, a[1] + uy * d];
   };
-  const curve = catmullRom([extend(first, second), ...points, extend(last, beforeLast)]);
+  const curve = catmullRom([
+    cfg.depart ?? extend(first, second),
+    ...points,
+    cfg.arrivee ?? extend(last, beforeLast),
+  ]);
 
   const co = new ClipperLib.ClipperOffset(2, 0.25 * SCALE);
   co.AddPath(toPath(curve), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);

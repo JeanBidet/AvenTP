@@ -74,9 +74,14 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
         </p>
       </SectionHeading>
     </div>
-    <!-- Deux allées générées au build : horizontale (≥ md) et verticale (mobile). -->
-    <Mosaic config={allee} items={types} class="hidden md:block" />
-    <Mosaic config={alleeMobile} items={types} class="md:hidden" />
+    <!--
+      Deux allées générées au build. L'horizontale est à l'échelle 1:1 : ses dalles
+      gardent la même taille et un écran plus large en montre davantage. Il lui faut
+      1280 px pour que les cinq dalles photo tiennent à cette échelle, d'où le palier
+      xl ; en dessous, c'est la verticale, qui s'étire à la largeur disponible.
+    -->
+    <Mosaic config={allee} items={types} taille="fixe" class="hidden xl:block" />
+    <Mosaic config={alleeMobile} items={types} class="xl:hidden" />
   </section>
 
   <!-- Chantiers récents : diaporama -->

@@ -60,23 +60,25 @@ le build avec un message explicite.
 La section « Ce que nous réalisons » est une allée de dalles qui s'emboîtent,
 **calculée au build** par `src/lib/mosaic.ts` :
 
-1. une spline de Catmull-Rom passe par les `points` ; épaissie de `largeur`, elle donne l'allée.
-   Elle est prolongée un peu au-delà du premier et du dernier point et terminée par un
-   **bout arrondi** ; ce prolongement est automatiquement raccourci pour que le bout tienne
-   dans la zone, afin qu'il ne soit pas tranché à plat par son bord ;
+1. une spline de Catmull-Rom va de `depart` à `arrivee` en passant par les `points` ;
+   épaissie de `largeur`, elle donne l'allée. `depart` et `arrivee` sont hors de la zone,
+   donc l'allée est tranchée net par le bord qu'elle franchit, comme si elle continuait
+   au-delà de la page ;
 2. une dalle photo irrégulière est posée sur chaque point ;
 3. les graines des petites dalles sont tirées par échantillonnage de Poisson
    (au moins `espacement` entre elles), hors des dalles photo ;
 4. leur diagramme de Voronoï (`d3-delaunay`), aux arêtes cassées en ligne brisée (`decoupe`),
    est découpé par « allée moins dalles photo » : tout l'espace est pavé, sans trou ;
 5. chaque dalle est rétrécie de la moitié du `joint` puis arrondie (`clipper-lib`) ;
-6. les polygones deviennent des `clip-path` en pourcentages, donc la mosaïque s'adapte à l'écran.
+6. les polygones deviennent des `clip-path` en pourcentages de la zone de dessin.
 
-Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `alleeMobile`.
+Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 1280 px) et `alleeMobile`.
 
 | Réglage | Effet |
 |---|---|
+| `width`, `height` | taille de la zone de dessin |
 | `points` | tracé de l'allée ; une photo est centrée sur chaque point (5 points = 5 types) |
+| `depart`, `arrivee` | par où l'allée entre et sort ; **hors de la zone**, sinon le bout arrondi se voit |
 | `largeur` | épaisseur de l'allée |
 | `espacement` | taille des petites dalles (plus grand = moins de dalles, plus grosses) |
 | `degagementPhoto` | taille des dalles photo (diamètre ≈ 1,25 × la valeur) |
@@ -84,18 +86,37 @@ Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `
 | `joint`, `arrondi`, `lisere` | largeur des joints, arrondi des angles, bord de pierre autour des photos |
 | `graine` | autre tirage aléatoire des petites dalles pour la même forme |
 
-Deux règles à respecter en déplaçant les `points` :
+### Deux échelles
 
-- garder le premier et le dernier point à au moins `largeur / 2 + joint` des bords vers
-  lesquels ils pointent, sinon il n'y a pas la place pour le bout arrondi et il est rogné ;
+Le composant `Mosaic` prend une prop `taille` :
+
+- `taille="fixe"` (l'allée horizontale) : la zone est posée à sa taille **en pixels**,
+  centrée, et rognée par la largeur de l'écran. Les unités de la config sont donc des
+  pixels réels. Les dalles gardent la même taille partout, et un écran plus large montre
+  une allée **plus longue, avec plus de pavés** — de 63 dalles vues à 1280 px à 124 à
+  2560 px. La section garde une hauteur constante de `height` pixels.
+- `taille="elastique"` (l'allée verticale) : la zone s'étire à la largeur disponible et
+  tout grossit ensemble, dalles photo comprises.
+
+C'est ce qui fixe le palier `xl` (1280 px) entre les deux allées dans `index.astro` :
+à l'échelle 1:1, cinq dalles photo de ~220 px ne tiennent pas dans une fenêtre plus
+étroite. Les points sont donc placés dans les 1280 px centraux de la zone (x de 640 à
+1920) pour que les cinq photos soient visibles dès 1280 px ; de part et d'autre, l'allée
+continue en pavés jusqu'aux bords.
+
+### Règles à respecter en déplaçant les points
+
 - laisser au moins `1,25 × degagementPhoto` entre deux points voisins, sinon les dalles
-  photo se touchent.
+  photo se touchent ;
+- garder l'allée à plus de `largeur / 2` des bords haut et bas, sinon elle y est tranchée
+  aussi et la coupe ne se lit plus comme une sortie de page ;
+- en échelle fixe, garder les dalles photo dans la fenêtre la plus étroite prévue
+  (ici x de 640 à 1920), sinon elles sortent du champ sur les petits écrans.
 
 Sur mobile l'allée est volontairement plus large que la zone (390 pour 400) : elle est
-coupée sur ses deux flancs, pleine largeur, et seuls ses bouts haut et bas sont arrondis.
+pleine largeur, coupée sur ses deux flancs, et entre par le haut et sort par le bas.
 
-Modifier une valeur puis `npm run dev` : la page se recalcule. Exemple, une diagonale :
-`points: [[150, 750], [450, 600], [750, 450], [1050, 300], [1320, 150]]`.
+Modifier une valeur puis `npm run dev` : la page se recalcule.
 
 Si une petite dalle manque (tache sombre au milieu du pavage), c'est une cellule trop
 fine supprimée par le seuil d'aire de `finish()` : changer `graine` plutôt que le seuil.

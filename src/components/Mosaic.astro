@@ -20,17 +20,36 @@ interface Props {
   config: MosaicConfig;
   items: MosaicItem[];
   class?: string;
+  /**
+   * `fixe` : la zone est dessinée à sa taille en pixels, centrée, et rognée par la
+   * largeur de l'écran. Les dalles gardent donc la même taille sur tous les écrans ;
+   * un écran plus large montre une allée plus longue, avec plus de pavés.
+   * `elastique` : la zone s'étire à la largeur disponible, tout grossit ensemble.
+   */
+  taille?: "fixe" | "elastique";
 }
 
-const { config, items, class: className } = Astro.props;
+const { config, items, class: className, taille = "elastique" } = Astro.props;
+const fixe = taille === "fixe";
 const m = generateMosaic(config);
 const box = (s: { left: number; top: number; width: number; height: number }) =>
   `left:${s.left}%;top:${s.top}%;width:${s.width}%;height:${s.height}%`;
+/** Largeur d'affichage d'une dalle, en px si l'échelle est fixe (sert à `sizes`). */
+const pxWidth = (s: { width: number }) => Math.round((s.width / 100) * m.width);
 ---
 
+<!--
+  Deux boîtes : celle de dehors est à la largeur de l'écran et rogne ; celle de dedans
+  porte la zone de dessin, à taille fixe ou étirée. Les dalles sont positionnées en
+  pourcentages de la boîte de dedans, donc un seul et même calcul sert aux deux modes.
+-->
 <div
-  class:list={["relative w-full overflow-hidden bg-ink [container-type:inline-size]", className]}
-  style={`aspect-ratio:${m.width} / ${m.height}`}
+  class:list={["relative w-full overflow-hidden bg-ink", className]}
+  style={fixe ? `height:${m.height}px` : `aspect-ratio:${m.width} / ${m.height}`}
+>
+<div
+  class="absolute top-0 left-1/2 -translate-x-1/2 [container-type:inline-size]"
+  style={fixe ? `width:${m.width}px;height:${m.height}px` : "width:100%;height:100%"}
 >
   {m.stones.map((s) => {
     if (!s.photo) {
@@ -54,8 +73,8 @@ const box = (s: { left: number; top: number; width: number; height: number }) =>
           <Image
             src={item.img}
             alt={item.alt}
-            widths={[400, 640, 900]}
-            sizes="(min-width: 768px) 32vw, 90vw"
+            widths={fixe ? [pxWidth(s), pxWidth(s) * 2] : [400, 640, 900]}
+            sizes={fixe ? `${pxWidth(s)}px` : "(min-width: 768px) 32vw, 90vw"}
             class="size-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         </div>
@@ -70,4 +89,5 @@ const box = (s: { left: number; top: number; width: number; height: number }) =>
       </a>
     );
   })}
+</div>
 </div>
