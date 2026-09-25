@@ -60,7 +60,10 @@ le build avec un message explicite.
 La section « Ce que nous réalisons » est une allée de dalles qui s'emboîtent,
 **calculée au build** par `src/lib/mosaic.ts` :
 
-1. une spline de Catmull-Rom passe par les `points` ; épaissie de `largeur`, elle donne l'allée ;
+1. une spline de Catmull-Rom passe par les `points` ; épaissie de `largeur`, elle donne l'allée.
+   Elle est prolongée un peu au-delà du premier et du dernier point et terminée par un
+   **bout arrondi** ; ce prolongement est automatiquement raccourci pour que le bout tienne
+   dans la zone, afin qu'il ne soit pas tranché à plat par son bord ;
 2. une dalle photo irrégulière est posée sur chaque point ;
 3. les graines des petites dalles sont tirées par échantillonnage de Poisson
    (au moins `espacement` entre elles), hors des dalles photo ;
@@ -81,8 +84,21 @@ Les réglages sont dans `src/data/mosaic.ts` : `allee` (écrans ≥ 768 px) et `
 | `joint`, `arrondi`, `lisere` | largeur des joints, arrondi des angles, bord de pierre autour des photos |
 | `graine` | autre tirage aléatoire des petites dalles pour la même forme |
 
+Deux règles à respecter en déplaçant les `points` :
+
+- garder le premier et le dernier point à au moins `largeur / 2 + joint` des bords vers
+  lesquels ils pointent, sinon il n'y a pas la place pour le bout arrondi et il est rogné ;
+- laisser au moins `1,25 × degagementPhoto` entre deux points voisins, sinon les dalles
+  photo se touchent.
+
+Sur mobile l'allée est volontairement plus large que la zone (390 pour 400) : elle est
+coupée sur ses deux flancs, pleine largeur, et seuls ses bouts haut et bas sont arrondis.
+
 Modifier une valeur puis `npm run dev` : la page se recalcule. Exemple, une diagonale :
 `points: [[150, 750], [450, 600], [750, 450], [1050, 300], [1320, 150]]`.
+
+Si une petite dalle manque (tache sombre au milieu du pavage), c'est une cellule trop
+fine supprimée par le seuil d'aire de `finish()` : changer `graine` plutôt que le seuil.
 
 ## Thème
 

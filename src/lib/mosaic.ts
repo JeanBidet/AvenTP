@@ -193,14 +193,33 @@ export function generateMosaic(cfg: MosaicConfig): Mosaic {
   const { width: W, height: H, points } = cfg;
   const random = rng(cfg.graine);
 
-  // 1-2. Allée : courbe prolongée hors cadre aux deux bouts, puis épaissie.
+  // 1-2. Allée : courbe prolongée un peu au-delà des deux points extrêmes, puis épaissie.
+  //      Le bout est arrondi (etOpenRound) et le prolongement est borné pour que le
+  //      demi-disque du bout tienne dans le cadre : l'allée se termine donc par un arc
+  //      à l'intérieur de la zone, au lieu d'être tranchée à plat par son bord.
   const [first, second] = [points[0], points[1] ?? points[0]];
   const [last, beforeLast] = [points[points.length - 1], points[points.length - 2] ?? points[0]];
-  const extend = (a: Pt, b: Pt): Pt => [a[0] + (a[0] - b[0]) * 1.2, a[1] + (a[1] - b[1]) * 1.2];
+  const capR = cfg.largeur / 2 + cfg.joint; // rayon du bout, plus une marge de joint
+  const extend = (a: Pt, b: Pt): Pt => {
+    const [dx, dy] = [a[0] - b[0], a[1] - b[1]];
+    const len = Math.hypot(dx, dy) || 1;
+    const [ux, uy] = [dx / len, dy / len]; // direction de sortie, unitaire
+    // Distance parcourable sur un axe avant que le disque du bout n'en sorte.
+    // Un axe trop étroit pour le contenir (allée pleine largeur sur mobile) ne
+    // contraint rien : de ce côté l'allée est volontairement coupée par le bord.
+    const room = (pos: number, u: number, size: number) => {
+      if (size < 2 * capR) return Infinity;
+      if (u > 0) return (size - capR - pos) / u;
+      if (u < 0) return (capR - pos) / u;
+      return Infinity;
+    };
+    const d = Math.max(0, Math.min(cfg.degagementPhoto * 0.5, room(a[0], ux, W), room(a[1], uy, H)));
+    return [a[0] + ux * d, a[1] + uy * d];
+  };
   const curve = catmullRom([extend(first, second), ...points, extend(last, beforeLast)]);
 
   const co = new ClipperLib.ClipperOffset(2, 0.25 * SCALE);
-  co.AddPath(toPath(curve), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenButt);
+  co.AddPath(toPath(curve), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
   const bandRaw: ClipperLib.Paths = [];
   co.Execute(bandRaw, (cfg.largeur / 2) * SCALE);
   const frame: Poly = [[0, 0], [W, 0], [W, H], [0, H]];
