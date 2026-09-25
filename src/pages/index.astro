@@ -48,8 +48,7 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
       sizes="100vw"
       class="absolute inset-0 size-full object-cover opacity-60"
     />
-    <!-- z-20 : l'encadré reste au-dessus de l'allée qui remonte dans la photo -->
-    <div class="container-site relative z-20">
+    <div class="container-site relative">
       <div class="mb-8 flex w-full max-w-[640px] animate-fade-up flex-col gap-5 border-t-6 border-accent bg-ink px-7 py-8 lg:mb-16 lg:px-12 lg:py-11">
         <p class="text-[13px] font-semibold tracking-[2px] text-accent uppercase">Paysagisme · Terrassement</p>
         <h1 class="font-display text-[32px] leading-[1.05] font-bold tracking-tight sm:text-[40px] lg:text-[52px]">
@@ -66,28 +65,18 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
     </div>
   </section>
 
-  <!--
-    Réalisations types : allée en mosaïque.
-    ≥ lg : l'allée remonte dans la photo d'accueil (marge négative en % de la largeur,
-           comme la mosaïque) et le titre se place dans le creux entre ses deux branches.
-    < lg : allée verticale qui sort aussi de la photo, titre dans un encadré noir par-dessus.
-  -->
-  <section id="services" class="pb-16 lg:pb-20" aria-labelledby="services-title">
-    <div class="relative z-10 -mt-16 lg:-mt-[13.9%]">
-      <div class="pointer-events-none absolute inset-x-0 top-[110px] z-20 flex justify-center px-6 sm:top-[140px] lg:top-[21%] lg:px-0">
-        <div class="pointer-events-auto flex w-full max-w-[520px] flex-col gap-3.5 rounded-md border-t-4 border-accent bg-ink px-6 py-7 lg:w-auto lg:items-center lg:border-0 lg:bg-transparent lg:p-0 lg:text-center">
-          <p class="eyebrow">Nos métiers</p>
-          <h2 id="services-title" class="font-display text-[30px] leading-tight font-bold tracking-tight sm:text-[34px] xl:text-[44px]">Ce que nous réalisons</h2>
-          <p class="mt-1 text-muted">
-            Du terrassement préparatoire jusqu'aux finitions paysagères, AvenTP prend en charge l'ensemble de votre projet extérieur.
-          </p>
-        </div>
-      </div>
-      <Mosaic config={allee} items={types} fadeTop={24} class="hidden lg:block" />
-      <div class="mx-auto max-w-[520px] lg:hidden">
-        <Mosaic config={alleeMobile} items={types} fadeTop={6} />
-      </div>
+  <!-- Réalisations types : allée en mosaïque -->
+  <section id="services" class="py-20 lg:py-30" aria-labelledby="services-title">
+    <div class="container-site">
+      <SectionHeading eyebrow="Nos métiers" title="Ce que nous réalisons" id="services-title">
+        <p class="max-w-[440px] text-muted">
+          Du terrassement préparatoire jusqu'aux finitions paysagères, AvenTP prend en charge l'ensemble de votre projet extérieur.
+        </p>
+      </SectionHeading>
     </div>
+    <!-- Deux allées générées au build : horizontale (≥ md) et verticale (mobile). -->
+    <Mosaic config={allee} items={types} class="hidden md:block" />
+    <Mosaic config={alleeMobile} items={types} class="md:hidden" />
   </section>
 
   <!-- Chantiers récents : diaporama -->

@@ -20,20 +20,17 @@ interface Props {
   config: MosaicConfig;
   items: MosaicItem[];
   class?: string;
-  /** Fondu en haut (en % de la hauteur) : les dalles apparaissent progressivement */
-  fadeTop?: number;
 }
 
-const { config, items, class: className, fadeTop = 0 } = Astro.props;
-const mask = fadeTop > 0 ? `;mask-image:linear-gradient(to bottom, transparent 0%, #000 ${fadeTop}%)` : "";
+const { config, items, class: className } = Astro.props;
 const m = generateMosaic(config);
 const box = (s: { left: number; top: number; width: number; height: number }) =>
   `left:${s.left}%;top:${s.top}%;width:${s.width}%;height:${s.height}%`;
 ---
 
 <div
-  class:list={["relative w-full overflow-hidden [container-type:inline-size]", className]}
-  style={`aspect-ratio:${m.width} / ${m.height}${mask}`}
+  class:list={["relative w-full overflow-hidden bg-ink [container-type:inline-size]", className]}
+  style={`aspect-ratio:${m.width} / ${m.height}`}
 >
   {m.stones.map((s) => {
     if (!s.photo) {
