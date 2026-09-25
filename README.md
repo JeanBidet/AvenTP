@@ -134,11 +134,29 @@ texte **sur fond noir** (contraste ≈ 10:1), jamais de texte sur fond blanc (�
 
 ## À faire avant la mise en ligne
 
-- Remplacer les valeurs entre crochets (`[TÉLÉPHONE]`, `[Ville]`…) dans `src/data/site.ts`,
-  `src/pages/index.astro` et les fiches chantier.
-- Remplacer les illustrations (`illu-*.svg`) par de vraies photos de chantiers,
-  et s'assurer de détenir les droits sur toutes les photos.
-- Brancher le formulaire de contact (`src/components/Contact.astro`) sur un service
-  d'envoi (Formspree, Netlify Forms, Web3Forms…).
-- Renseigner le vrai domaine dans `astro.config.mjs` (`site`).
-- Rédiger les mentions légales et la politique de confidentialité.
+Ce qui demande des informations que seule l'entreprise a :
+
+- **Remplacer les valeurs entre crochets.** `src/data/site.ts` (téléphone, courriel,
+  adresse, clé Web3Forms), `src/pages/index.astro` (phrase d'accroche du bandeau
+  d'accueil, présentation courte), `src/pages/mentions-legales.astro` (raison sociale,
+  forme juridique, capital, SIREN/SIRET, RCS, TVA, responsable de publication,
+  hébergeur, assurances, médiateur de la consommation),
+  `src/pages/confidentialite.astro` (durées de conservation, hébergeur, localisation
+  des serveurs de Web3Forms) et les fiches de `src/content/realisations/`
+  (`[Ville]`, `[Année]`).
+- **Créer la clé Web3Forms** sur [web3forms.com](https://web3forms.com) et la coller
+  dans `site.formAccessKey`, puis envoyer un message de test : sans clé valide, le
+  formulaire de contact ne part pas.
+- **Remplacer les illustrations** `illu-*.svg` par de vraies photos de chantiers
+  (deux des cinq dalles photo de l'accueil en sont encore), et s'assurer de détenir
+  les droits sur toutes les photos.
+- **Vérifier le domaine** dans `astro.config.mjs` (`site`). Il sert au sitemap, aux
+  balises canoniques, à l'image de partage et à l'adresse de retour du formulaire :
+  s'il est faux, le formulaire renvoie le visiteur au mauvais endroit.
+- **Mettre à jour `Sitemap:`** dans `public/robots.txt` si le domaine change.
+- **Renseigner les liens des réseaux sociaux** dans `site.socials` (ils pointent
+  sur `#`), ou retirer les entrées inutiles.
+
+Déjà en place : formulaire relié à Web3Forms avec page de confirmation `/merci`,
+mentions légales et politique de confidentialité reliées au pied de page,
+`sitemap-index.xml`, `robots.txt`, image de partage et balises Open Graph.

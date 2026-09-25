@@ -1,18 +1,27 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import { getImage } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { site } from "../data/site";
 import "../styles/global.css";
+import ogSource from "../assets/img/hero-terrasse-jardin.jpg";
 
 interface Props {
   title?: string;
   description?: string;
+  /** Page utile au visiteur mais sans intérêt dans les moteurs de recherche (ex. /merci). */
+  noindex?: boolean;
 }
 
-const { title, description = site.description } = Astro.props;
+const { title, description = site.description, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// Image de partage (réseaux sociaux, messageries) : recadrée au format 1200 x 630 au
+// build. Les og:image doivent être des adresses absolues, d'où le new URL().
+const og = await getImage({ src: ogSource, width: 1200, height: 630, format: "jpeg" });
+const ogImage = new URL(og.src, Astro.site);
 ---
 
 <!doctype html>
@@ -23,12 +32,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#000000" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`Chantier réalisé par ${site.name}`} />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- Ajouté avant le rendu : le CSS ne masque les éléments animés que si JS tourne. -->
     <script is:inline>document.documentElement.classList.add("js");</script>
     <!-- View Transitions : navigation entre pages sans rechargement, avec fondu. -->
