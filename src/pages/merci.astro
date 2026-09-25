@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+import { site } from "../data/site";
+---
+
+<BaseLayout
+  title="Demande envoyée"
+  description="Votre demande de devis a bien été transmise à AvenTP."
+>
+  <section class="flex min-h-[70vh] items-center py-20">
+    <div class="container-site flex max-w-[620px] flex-col items-start gap-6">
+      <span class="grid size-14 place-items-center rounded-full bg-accent text-ink">
+        <Icon name="check" class="size-7" strokeWidth={2.5} />
+      </span>
+      <h1 class="font-display text-[34px] leading-tight font-bold tracking-tight lg:text-[44px]">
+        Merci, votre demande est partie.
+      </h1>
+      <p class="text-[17px] text-muted">
+        Nous revenons vers vous rapidement. Si votre projet est urgent, appelez-nous
+        directement au <a href={site.phoneHref} class="font-semibold text-white underline decoration-accent decoration-2 underline-offset-4">{site.phone}</a>.
+      </p>
+      <div class="flex flex-wrap gap-3 pt-2">
+        <a href="/" class="btn-accent">Retour à l'accueil</a>
+        <a href="/realisations" class="btn-outline">Voir nos réalisations</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

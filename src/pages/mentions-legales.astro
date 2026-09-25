@@ -1,0 +1,74 @@
+---
+/**
+ * Mentions légales — obligatoires pour tout site professionnel (art. 6-III de la
+ * LCEN). Toutes les valeurs entre crochets sont à remplacer par les vraies données
+ * de l'entreprise : ne rien inventer ici, c'est un document opposable.
+ */
+import TextLayout from "../layouts/TextLayout.astro";
+import { site } from "../data/site";
+---
+
+<TextLayout
+  title="Mentions légales"
+  description="Mentions légales du site AvenTP : éditeur, hébergeur, propriété intellectuelle."
+  updated="[DATE DE MISE À JOUR]"
+>
+  <h2>Éditeur du site</h2>
+  <dl>
+    <dt>Dénomination sociale</dt><dd>[RAISON SOCIALE]</dd>
+    <dt>Forme juridique</dt><dd>[FORME JURIDIQUE — SARL, SAS, EI…]</dd>
+    <dt>Capital social</dt><dd>[MONTANT] €</dd>
+    <dt>Siège social</dt><dd>{site.address}</dd>
+    <dt>Téléphone</dt><dd>{site.phone}</dd>
+    <dt>Courriel</dt><dd>{site.email}</dd>
+    <dt>SIREN / SIRET</dt><dd>[SIREN] / [SIRET]</dd>
+    <dt>RCS</dt><dd>[VILLE DU GREFFE] [NUMÉRO]</dd>
+    <dt>TVA intracommunautaire</dt><dd>[FR00000000000]</dd>
+    <dt>Responsable de la publication</dt><dd>[NOM DU GÉRANT]</dd>
+  </dl>
+
+  <h2>Hébergeur</h2>
+  <dl>
+    <dt>Nom</dt><dd>[NOM DE L'HÉBERGEUR]</dd>
+    <dt>Adresse</dt><dd>[ADRESSE DE L'HÉBERGEUR]</dd>
+    <dt>Téléphone</dt><dd>[TÉLÉPHONE DE L'HÉBERGEUR]</dd>
+  </dl>
+
+  <h2>Assurances</h2>
+  <p>
+    [NOM DE L'ASSUREUR] — responsabilité civile professionnelle et garantie décennale
+    n° [NUMÉRO DE CONTRAT], couvrant les travaux réalisés en [ZONE GÉOGRAPHIQUE COUVERTE].
+  </p>
+
+  <h2>Médiation de la consommation</h2>
+  <p>
+    Conformément aux articles L.612-1 et suivants du code de la consommation, tout client
+    particulier peut recourir gratuitement à un médiateur de la consommation en vue de la
+    résolution amiable d'un litige : [NOM DU MÉDIATEUR], [ADRESSE], [SITE WEB DU MÉDIATEUR].
+    La saisine du médiateur suppose qu'une réclamation écrite ait d'abord été adressée à
+    {site.name}.
+  </p>
+
+  <h2>Propriété intellectuelle</h2>
+  <p>
+    L'ensemble de ce site — structure, textes, photographies et éléments graphiques — est
+    la propriété de [RAISON SOCIALE], sauf mention contraire. Toute reproduction ou
+    représentation, totale ou partielle, sans autorisation écrite préalable est interdite.
+  </p>
+  <p>
+    Crédits photographiques : [AUTEUR DES PHOTOS — photographe, ou « photographies de
+    chantiers réalisées par l'entreprise »].
+  </p>
+
+  <h2>Données personnelles</h2>
+  <p>
+    Le traitement des données transmises via le formulaire de contact est décrit dans notre
+    <a href="/confidentialite">politique de confidentialité</a>.
+  </p>
+
+  <h2>Droit applicable</h2>
+  <p>
+    Le présent site est soumis au droit français. En cas de litige, et à défaut de
+    résolution amiable, les tribunaux [VILLE] sont compétents.
+  </p>
+</TextLayout>

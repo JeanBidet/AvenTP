@@ -1,0 +1,87 @@
+---
+/**
+ * Politique de confidentialité (RGPD). Le site est statique et ne dépose aucun cookie ;
+ * la seule collecte de données est le formulaire de contact, relayé par Web3Forms.
+ * Valeurs entre crochets à compléter, notamment la durée de conservation retenue.
+ */
+import TextLayout from "../layouts/TextLayout.astro";
+import { site } from "../data/site";
+---
+
+<TextLayout
+  title="Politique de confidentialité"
+  description="Quelles données AvenTP collecte via son formulaire de contact, pourquoi, combien de temps, et comment exercer vos droits."
+  updated="[DATE DE MISE À JOUR]"
+>
+  <p>
+    Cette page explique quelles données personnelles {site.name} collecte sur ce site,
+    pourquoi, combien de temps elles sont conservées, et comment exercer vos droits.
+  </p>
+
+  <h2>Responsable du traitement</h2>
+  <p>
+    [RAISON SOCIALE], {site.address} — {site.email}, {site.phone}.
+    Les coordonnées complètes figurent dans les <a href="/mentions-legales">mentions légales</a>.
+  </p>
+
+  <h2>Quelles données, et pourquoi</h2>
+  <p>
+    La seule collecte de données sur ce site est le <strong>formulaire de demande de
+    devis</strong>. Les champs transmis sont : nom, adresse électronique, numéro de
+    téléphone (facultatif) et description du projet.
+  </p>
+  <dl>
+    <dt>Finalité</dt><dd>répondre à votre demande et, le cas échéant, établir un devis.</dd>
+    <dt>Base légale</dt><dd>votre consentement, recueilli par la case à cocher du formulaire (art. 6.1.a du RGPD).</dd>
+    <dt>Caractère obligatoire</dt><dd>sans le nom, l'adresse électronique et la description, nous ne pouvons pas répondre.</dd>
+  </dl>
+  <p>
+    Ces données ne servent à aucune prospection commerciale, ne sont ni vendues ni cédées,
+    et ne font l'objet d'aucune décision automatisée ni d'aucun profilage.
+  </p>
+
+  <h2>Qui y a accès</h2>
+  <ul>
+    <li>
+      Les personnes de {site.name} chargées du suivi des demandes.
+    </li>
+    <li>
+      <strong>Web3Forms</strong>, qui relaie le formulaire vers notre boîte de courriel :
+      le site étant statique, il n'a pas de serveur pour le recevoir. Ce prestataire agit
+      comme sous-traitant au sens du RGPD. Localisation des serveurs et garanties en cas
+      de transfert hors Union européenne : [À VÉRIFIER DANS LE CONTRAT WEB3FORMS].
+    </li>
+    <li>
+      <strong>[NOM DE L'HÉBERGEUR]</strong>, qui héberge le site et journalise les accès
+      techniques.
+    </li>
+  </ul>
+
+  <h2>Combien de temps</h2>
+  <p>
+    Les demandes de devis sont conservées [DURÉE — par exemple 3 ans à compter du dernier
+    contact], puis supprimées. Les demandes ayant donné lieu à un chantier sont conservées
+    au titre des obligations comptables et de la garantie décennale.
+  </p>
+
+  <h2>Cookies</h2>
+  <p>
+    Ce site ne dépose <strong>aucun cookie</strong> et n'utilise aucun outil de mesure
+    d'audience ni de réseau publicitaire. Les polices de caractères sont servies depuis
+    notre propre hébergement, donc aucune requête n'est faite à un tiers lors de votre
+    visite. Aucune bannière de consentement n'est donc nécessaire.
+  </p>
+
+  <h2>Vos droits</h2>
+  <p>
+    Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et
+    d'opposition au traitement, ainsi que d'un droit à la portabilité de vos données, et
+    du droit de retirer votre consentement à tout moment. Pour les exercer, écrivez à
+    {site.email} ou à l'adresse postale ci-dessus ; une réponse vous sera apportée dans
+    un délai d'un mois.
+  </p>
+  <p>
+    Si la réponse ne vous satisfait pas, vous pouvez introduire une réclamation auprès de
+    la CNIL : <a href="https://www.cnil.fr/fr/plaintes">www.cnil.fr/fr/plaintes</a>.
+  </p>
+</TextLayout>

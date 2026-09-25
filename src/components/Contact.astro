@@ -37,11 +37,19 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
     </div>
 
     <!--
-      Le site est statique : pas de serveur pour recevoir le formulaire.
-      Brancher « action » sur un service (Formspree, Netlify Forms, Web3Forms…)
-      ou sur une API maison le jour de la mise en ligne.
+      Le site est statique : pas de serveur à nous pour recevoir le formulaire.
+      Web3Forms fait le relais et transfère la demande vers site.email.
+      Les trois champs cachés : la clé du compte, l'objet de l'email reçu, et
+      l'adresse de retour après envoi (le service y renvoie le visiteur lui-même,
+      donc aucun JavaScript n'est nécessaire).
     -->
-    <form class="flex flex-col gap-5" method="post" action="#">
+    <form class="flex flex-col gap-5" method="POST" action="https://api.web3forms.com/submit">
+      <input type="hidden" name="access_key" value={site.formAccessKey} />
+      <input type="hidden" name="subject" value={`Demande de devis — ${site.name}`} />
+      <input type="hidden" name="redirect" value={new URL("/merci", Astro.site).href} />
+      <!-- Piège à robots : un humain ne voit pas ce champ, donc ne le remplit jamais. -->
+      <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" aria-hidden="true" />
+
       <div class="grid gap-5 sm:grid-cols-2">
         <label class={label}>Nom
           <input class={field} type="text" name="name" autocomplete="name" required />
@@ -55,6 +63,14 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
       </label>
       <label class={label}>Votre projet
         <textarea class:list={[field, "min-h-36 resize-y"]} name="message" rows="5" required></textarea>
+      </label>
+      <label class="flex items-start gap-3 text-sm text-neutral-400">
+        <input type="checkbox" name="consentement" value="oui" required
+          class="mt-0.5 size-4.5 shrink-0 accent-accent" />
+        <span>
+          J'accepte que ces informations soient utilisées pour être recontacté au sujet de
+          ma demande (<a href="/confidentialite" class="underline hover:text-accent">politique de confidentialité</a>).
+        </span>
       </label>
       <button type="submit" class="btn-accent self-start">Envoyer la demande</button>
     </form>
