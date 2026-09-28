@@ -20,7 +20,7 @@ photos de chantiers et demande de devis.
 
 - **Astro 7** (site 100 % statique) + **Tailwind CSS 4** (plugin Vite, config dans le CSS via `@theme`).
 - Node ≥ 22.12. Polices locales via Fontsource (Space Grotesk titres, Work Sans texte).
-- `embla-carousel` (diaporama), `d3-delaunay` + `clipper-lib` (mosaïque, calcul au build).
+- `embla-carousel` (diaporama), `@astrojs/sitemap` (sitemap au build).
 
 ```bash
 npm run dev      # http://localhost:4321

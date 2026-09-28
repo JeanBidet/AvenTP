@@ -106,13 +106,3 @@
   .js .reveal { opacity: 1; }
   .js .reveal.is-visible { animation: none; }
 }
-
-/* Texture de pierre des dalles de la mosaïque (dessinée en CSS, aucune image chargée) */
-.stone-flat {
-  background-color: #a7a092;
-  background-image:
-    radial-gradient(circle at 20% 30%, rgb(255 255 255 / 0.12) 0 2px, transparent 3px),
-    radial-gradient(circle at 70% 70%, rgb(0 0 0 / 0.12) 0 2px, transparent 3px),
-    linear-gradient(135deg, #bbb5a7, #8d8678);
-  background-size: 23px 23px, 31px 31px, 100% 100%;
-}
