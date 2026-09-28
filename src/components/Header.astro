@@ -1,6 +1,8 @@
 ---
+import { Image } from "astro:assets";
 import Icon from "./Icon.astro";
 import { nav, site } from "../data/site";
+import logo from "../assets/img/logo-blanc.png";
 
 // Lien actif : comparaison du chemin courant (sans « / » final) avec chaque lien.
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
@@ -9,11 +11,25 @@ const isCurrent = (href: string) => !href.includes("#") && href === path;
 
 <header class="sticky top-0 z-50 border-b border-neutral-800 bg-ink">
   <div class="container-site flex h-18 items-center justify-between gap-6 lg:h-24">
-    <a href="/" class="flex items-center gap-3 hover:text-white" aria-label={`${site.name} — accueil`}>
-      <span class="grid size-10 place-items-center rounded-lg bg-accent text-ink">
-        <Icon name="logo" class="size-6" strokeWidth={2} />
-      </span>
-      <span class="font-display text-[26px] font-bold tracking-tight">{site.name}</span>
+    <!--
+      Le logo contient déjà le nom : pas de texte à côté, sinon il est écrit deux fois.
+      Le lien porte son propre aria-label, donc l'image reste en alt vide pour que les
+      lecteurs d'écran n'annoncent pas le nom en double.
+    -->
+    <a href="/" class="flex items-center hover:opacity-80" aria-label={`${site.name} — accueil`}>
+      {/*
+        Taille d'affichage fixe (75 px, 100 px à partir de lg), donc `densities` plutôt
+        que `widths` : Astro ne produit que le 1x et le 2x, et l'image de repli fait
+        100 px de large au lieu des 1159 px de la source.
+      */}
+      <Image
+        src={logo}
+        alt=""
+        width={100}
+        densities={[1, 2]}
+        loading="eager"
+        class="h-12 w-auto lg:h-16"
+      />
     </a>
 
     <!--
