@@ -51,7 +51,7 @@ const filters = [
     <ul class="grid gap-x-6 gap-y-12 pb-20 sm:grid-cols-2 lg:grid-cols-3 lg:pb-30">
       {projects.map((p, i) => (
         <li data-category={p.data.category} class="reveal">
-          <ProjectCard project={p} showTag imgClass="h-[320px] rounded-2xl" eager={i < 3} />
+          <ProjectCard project={p} showTag imgClass="h-[320px] rounded-2xl" eager={i < 3} coloriseAuSurvol />
         </li>
       ))}
     </ul>

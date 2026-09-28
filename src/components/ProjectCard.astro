@@ -11,13 +11,21 @@ interface Props {
   imgClass?: string;
   /** Première image visible : chargée en priorité */
   eager?: boolean;
+  /** Photo en noir et blanc, colorisée au survol (voir .colorise-au-survol) */
+  coloriseAuSurvol?: boolean;
 }
 
-const { project, showTag = false, imgClass = "h-[300px] rounded-lg", eager = false } = Astro.props;
+const {
+  project,
+  showTag = false,
+  imgClass = "h-[300px] rounded-lg",
+  eager = false,
+  coloriseAuSurvol = false,
+} = Astro.props;
 const { title, category, city, year, image, alt } = project.data;
 ---
 
-<figure class="m-0 flex flex-col gap-3.5">
+<figure class:list={["m-0 flex flex-col gap-3.5", coloriseAuSurvol && "colorise-au-survol"]}>
   <div class="relative overflow-hidden rounded-[inherit]">
     <!--
       <Image> (astro:assets) génère plusieurs tailles en WebP au build ;

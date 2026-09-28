@@ -96,6 +96,29 @@
   }
 }
 
+/*
+  Photos en noir et blanc qui se colorisent au survol (page Réalisations).
+
+  Tout est enfermé dans `@media (hover: hover)` : sur un écran tactile il n'y a pas de
+  survol pour révéler la couleur, donc le noir et blanc n'y est pas appliqué du tout et
+  les photos s'affichent d'emblée en couleur. `:focus-within` couvre la navigation au
+  clavier si la carte devient cliquable.
+*/
+@media (hover: hover) {
+  .colorise-au-survol img {
+    filter: grayscale(1);
+    transition: filter 600ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .colorise-au-survol:hover img,
+  .colorise-au-survol:focus-within img {
+    filter: grayscale(0);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .colorise-au-survol img { transition-duration: 0ms; }
+}
+
 /* Apparition au défilement. Masqué seulement si JS est actif (classe .js sur <html>) :
    sans JS, le contenu reste visible. */
 .js .reveal { opacity: 0; }
