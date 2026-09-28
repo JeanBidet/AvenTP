@@ -15,26 +15,26 @@ import imgJardin from "../assets/img/illu-jardin.svg";
 import imgCloture from "../assets/img/cloture-bois-pierre.jpg";
 import imgPiscine from "../assets/img/piscine-plage-pierre.jpg";
 
-// Réalisations types. Chaque image est taillée comme une pierre de mosaïque : un
-// polygone irrégulier (clip-path, sommets en % de la vignette, donc la découpe suit
-// la taille de la carte). Cinq découpes différentes, aucun angle droit ni arrondi,
-// pour que l'ensemble se lise comme un opus incertum et non comme des photos rognées.
+// Réalisations types. Chaque image a sa silhouette courbe, définie plus bas par un
+// <clipPath clipPathUnits="objectBoundingBox"> : les coordonnées vont de 0 à 1, donc la
+// forme suit la taille de la carte, et les courbes de Bézier autorisent pointes et
+// concavités — ce que `border-radius`, toujours convexe, ne permet pas.
 const types = [
   { title: "Allées", text: "Pavés, dalles, gravier stabilisé ou béton désactivé.", img: imgAllee,
     alt: "Allée en gravier bordée de dalles", href: "/realisations#allees",
-    clip: "16% 0, 100% 9%, 92% 72%, 74% 100%, 6% 90%, 0 30%" },
+    forme: "forme-galet" },
   { title: "Terrasses", text: "Bois, composite, pierre ou carrelage sur plot.", img: imgTerrasse,
     alt: "Illustration d'une terrasse en bois sous pergola", href: "/realisations#terrasses",
-    clip: "0 14%, 70% 0, 100% 22%, 100% 84%, 30% 100%, 8% 68%" },
+    forme: "forme-petale" },
   { title: "Jardins", text: "Engazonnement, plantations, massifs et haies.", img: imgJardin,
     alt: "Illustration d'un jardin avec pelouse, haie et massif fleuri", href: "/realisations#jardins",
-    clip: "10% 0, 88% 4%, 100% 40%, 82% 96%, 18% 100%, 0 54%" },
+    forme: "forme-haricot" },
   { title: "Clôtures", text: "Clôtures, portails, brise-vue et murets.", img: imgCloture,
     alt: "Clôture en lames de bois entre des piliers en pierre", href: "/realisations#clotures",
-    clip: "0 6%, 62% 0, 96% 26%, 100% 90%, 34% 100%, 4% 74%" },
+    forme: "forme-arche" },
   { title: "Piscines", text: "Terrassement de la fosse, plages et abords.", img: imgPiscine,
     alt: "Piscine entourée d'une plage en pierre", href: "/realisations#piscines",
-    clip: "22% 0, 96% 16%, 100% 66%, 60% 100%, 0 82%, 6% 28%" },
+    forme: "forme-goutte" },
 ];
 
 // Diaporama : les chantiers marqués « featured: true », triés par « order ».
@@ -71,6 +71,33 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
     </div>
   </section>
 
+  <!--
+    Silhouettes des vignettes de « Ce que nous réalisons ». `objectBoundingBox` fait
+    travailler le chemin dans un carré de 0 à 1 que le navigateur étire à la taille de
+    l'élément : une seule définition sert donc à toutes les largeurs de carte.
+    Le SVG est de taille nulle — il ne sert qu'à porter les définitions — mais il ne
+    doit pas être en `display:none`, sinon les références sont ignorées.
+  -->
+  <svg aria-hidden="true" focusable="false" class="pointer-events-none absolute size-0">
+    <defs>
+      <clipPath id="forme-galet" clipPathUnits="objectBoundingBox">
+        <path d="M .46 .02 C .75 .01 .99 .22 .96 .5 C .93 .78 .7 .99 .43 .97 C .17 .95 .02 .72 .04 .44 C .06 .18 .22 .04 .46 .02 Z" />
+      </clipPath>
+      <clipPath id="forme-petale" clipPathUnits="objectBoundingBox">
+        <path d="M .06 .06 C .4 0 .78 .06 .93 .28 C 1 .45 .98 .72 .78 .88 C .55 1.02 .2 .96 .08 .74 C 0 .55 0 .24 .06 .06 Z" />
+      </clipPath>
+      <clipPath id="forme-haricot" clipPathUnits="objectBoundingBox">
+        <path d="M .34 .03 C .64 -.01 .9 .12 .95 .32 C .99 .47 .76 .5 .78 .64 C .8 .8 .98 .82 .92 .92 C .8 1.04 .36 1 .16 .84 C 0 .7 .02 .28 .12 .15 C .18 .08 .25 .04 .34 .03 Z" />
+      </clipPath>
+      <clipPath id="forme-arche" clipPathUnits="objectBoundingBox">
+        <path d="M .04 .94 C .01 .58 .1 .18 .34 .06 C .57 -.05 .87 .05 .95 .3 C 1.02 .53 .98 .78 .96 .94 C .96 .98 .93 1 .88 1 L .12 1 C .06 1 .04 .98 .04 .94 Z" />
+      </clipPath>
+      <clipPath id="forme-goutte" clipPathUnits="objectBoundingBox">
+        <path d="M .5 .04 C .76 .02 .95 .2 .96 .44 C .97 .66 .99 .88 .99 .97 C .99 .99 .97 1 .94 .99 C .7 .95 .3 .96 .14 .8 C 0 .66 .02 .3 .2 .13 C .3 .06 .4 .04 .5 .04 Z" />
+      </clipPath>
+    </defs>
+  </svg>
+
   <!-- Réalisations types -->
   <section id="services" class="py-20 lg:py-30" aria-labelledby="services-title">
     <div class="container-site">
@@ -85,12 +112,12 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
           <li class="reveal" style={`animation-delay: ${i * 80}ms`}>
             <a href={t.href} class="group flex flex-col gap-4.5 hover:text-white">
               {/*
-                Deux fois le même polygone : le conteneur porte le liseré (fond clair,
-                2 px de marge) et la boîte intérieure, rétrécie d'autant, laisse voir un
-                bord de pierre tout autour de la photo — comme un joint de mosaïque.
+                Deux fois la même forme : le conteneur porte le liseré (fond clair, 2 px
+                de marge) et la boîte intérieure, rétrécie d'autant, laisse voir un bord
+                de pierre tout autour de la photo.
               */}
-              <div class="bg-line-strong p-[2px]" style={`clip-path:polygon(${t.clip})`}>
-                <div class="overflow-hidden" style={`clip-path:polygon(${t.clip})`}>
+              <div class="bg-line-strong p-[2px]" style={`clip-path:url(#${t.forme})`}>
+                <div style={`clip-path:url(#${t.forme})`}>
                   <Image
                     src={t.img}
                     alt={t.alt}
