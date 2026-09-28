@@ -15,20 +15,30 @@ import imgJardin from "../assets/img/illu-jardin.svg";
 import imgCloture from "../assets/img/cloture-bois-pierre.jpg";
 import imgPiscine from "../assets/img/piscine-plage-pierre.jpg";
 
-// Réalisations types. Les vignettes partagent la même forme sobre : un rectangle à
-// coins arrondis de 16 px (rounded-2xl), le rayon déjà utilisé par les boutons et les
-// champs du site.
+// Réalisations types. Chaque vignette a sa découpe : un grand rayon de 88 px sur
+// certains coins, 16 px sur les autres. L'ordre des quatre valeurs est celui de CSS :
+// haut-gauche, haut-droit, bas-droit, bas-gauche.
+//
+// 88 px et non 999 px comme à l'origine : à 999 px les deux coins du haut se rejoignent
+// toujours, quelle que soit la largeur, et la vignette devient un demi-cercle. À 88 px
+// la courbe est franche sur les grandes cartes et ne dégénère qu'au plus étroit.
+// Un seul endroit à changer pour l'ajuster : les cinq valeurs ci-dessous.
 const types = [
   { title: "Allées", text: "Pavés, dalles, gravier stabilisé ou béton désactivé.", img: imgAllee,
-    alt: "Allée en gravier bordée de dalles", href: "/realisations#allees" },
+    alt: "Allée en gravier bordée de dalles", href: "/realisations#allees",
+    shape: "rounded-[88px_88px_16px_16px]" },                        // porte : arrondie en haut
   { title: "Terrasses", text: "Bois, composite, pierre ou carrelage sur plot.", img: imgTerrasse,
-    alt: "Illustration d'une terrasse en bois sous pergola", href: "/realisations#terrasses" },
+    alt: "Illustration d'une terrasse en bois sous pergola", href: "/realisations#terrasses",
+    shape: "rounded-[88px_16px_88px_16px]" },                        // diagonale haut-gauche / bas-droite
   { title: "Jardins", text: "Engazonnement, plantations, massifs et haies.", img: imgJardin,
-    alt: "Illustration d'un jardin avec pelouse, haie et massif fleuri", href: "/realisations#jardins" },
+    alt: "Illustration d'un jardin avec pelouse, haie et massif fleuri", href: "/realisations#jardins",
+    shape: "rounded-[16px_88px_16px_88px]" },                        // diagonale haut-droite / bas-gauche
   { title: "Clôtures", text: "Clôtures, portails, brise-vue et murets.", img: imgCloture,
-    alt: "Clôture en lames de bois entre des piliers en pierre", href: "/realisations#clotures" },
+    alt: "Clôture en lames de bois entre des piliers en pierre", href: "/realisations#clotures",
+    shape: "rounded-[88px_16px_16px_16px]" },                        // un seul coin, haut-gauche
   { title: "Piscines", text: "Terrassement de la fosse, plages et abords.", img: imgPiscine,
-    alt: "Piscine entourée d'une plage en pierre", href: "/realisations#piscines" },
+    alt: "Piscine entourée d'une plage en pierre", href: "/realisations#piscines",
+    shape: "rounded-[16px_16px_88px_88px]" },                        // porte inversée : arrondie en bas
 ];
 
 // Diaporama : les chantiers marqués « featured: true », triés par « order ».
@@ -78,7 +88,7 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
         {types.map((t, i) => (
           <li class="reveal" style={`animation-delay: ${i * 80}ms`}>
             <a href={t.href} class="group flex flex-col gap-4.5 hover:text-white">
-              <div class="overflow-hidden rounded-2xl">
+              <div class:list={["overflow-hidden", t.shape]}>
                 <Image
                   src={t.img}
                   alt={t.alt}
