@@ -1,0 +1,117 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CtaBand from "../components/CtaBand.astro";
+
+/**
+ * Déroulé d'un chantier type, en cinq étapes.
+ *
+ * Chaque étape porte un `texte` (ce qui se passe, vrai pour le métier) et un
+ * `aRemplir` optionnel (engagements propres à l'entreprise : délais, gratuité,
+ * garanties). Ces derniers restent entre crochets tant qu'AvenTP ne les a pas
+ * fournis — les inventer donnerait des promesses commerciales fausses.
+ */
+const etapes = [
+  {
+    titre: "Premier échange",
+    texte:
+      "Vous décrivez votre projet : ce que l'espace ne vous permet pas aujourd'hui, ce que vous voudriez en faire, comment vous l'utilisez au quotidien. On parle usage avant de parler matériaux, parce qu'une allée carrossable, un coin repas et une zone de jeux n'imposent pas les mêmes contraintes de structure. La visite sur place complète l'échange : accès du terrain aux engins, pente, nature du sol, écoulement des eaux.",
+    aRemplir:
+      "[Le premier rendez-vous est-il gratuit ? Sous quel délai ? Sur quelle zone géographique intervenez-vous ?]",
+  },
+  {
+    titre: "Prise de côtes",
+    texte:
+      "Relevé du terrain : dimensions, différences de niveau, pentes, réseaux enterrés et limites de propriété. C'est l'étape qui conditionne tout le reste, parce qu'elle fixe les quantités — surface à paver, volume de terre à décaisser et à évacuer, linéaire de bordure. Un relevé soigné, c'est un devis qui n'a pas à être corrigé en cours de chantier.",
+    aRemplir:
+      "[Déclaration de projet de travaux (DT-DICT) pour le repérage des réseaux : à préciser si vous la prenez en charge.]",
+  },
+  {
+    titre: "Choix des matériaux",
+    texte:
+      "Pavés, dalles, bois, composite, gravier stabilisé, béton désactivé, essences végétales : chaque option se juge sur trois critères — l'usage qu'elle doit supporter, l'entretien qu'elle demande, le budget. L'orientation se fait vers ce qui tient dans la durée à votre exposition et sur votre type de sol, plutôt que vers ce qui photographie le mieux.",
+    aRemplir:
+      "[Échantillons fournis ? Visite de chantiers témoins ? Plan ou vue 3D avant décision ?]",
+  },
+  {
+    titre: "Devis",
+    texte:
+      "Un devis détaillé poste par poste : préparation et terrassement, fournitures, main-d'œuvre, évacuation des déblais. Ce découpage n'est pas cosmétique — il vous permet d'arbitrer, de réduire une surface ou de changer un matériau, sans avoir à reprendre le projet depuis le début.",
+    aRemplir:
+      "[Durée de validité du devis ? Acompte demandé à la commande ? Modalités de paiement ?]",
+  },
+  {
+    titre: "Réalisation",
+    texte:
+      "Terrassement et décaissement, fond de forme, drainage si le terrain le demande, pose, finitions, puis nettoyage et évacuation. Le chantier se déroule avec un interlocuteur unique, du premier coup de godet à la réception des travaux.",
+    aRemplir:
+      "[Délai habituel entre l'acceptation du devis et le début des travaux ? Durée moyenne d'un chantier ? Garantie décennale et assurances : à préciser.]",
+  },
+];
+---
+
+<BaseLayout
+  title="Déroulé d'un chantier"
+  description="De la première visite à la réception des travaux : les cinq étapes d'un chantier d'aménagement extérieur chez AvenTP."
+>
+  <section class="border-b border-neutral-800 pt-16 pb-8 lg:pt-24 lg:pb-12">
+    <div class="container-site flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+      <div class="flex flex-col gap-4">
+        <p class="eyebrow">Services</p>
+        <h1 class="font-display text-[44px] leading-none font-bold tracking-tighter lg:text-[64px]">
+          Le déroulé d'un chantier
+        </h1>
+      </div>
+      <p class="max-w-[460px] text-[17px] text-muted">
+        Cinq étapes, de la première visite à la réception des travaux. Le but : que vous
+        sachiez en permanence où en est votre projet et ce qu'il va coûter.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-14 lg:py-20" aria-labelledby="etapes-title">
+    <div class="container-site">
+      <h2 id="etapes-title" class="sr-only">Les cinq étapes</h2>
+
+      <!--
+        Une <ol> parce que l'ordre porte du sens : ces étapes s'enchaînent.
+        Le numéro est affiché en clair plutôt que laissé au marqueur de liste, car
+        Tailwind retire `list-style` — sans lui, plusieurs lecteurs d'écran cessent
+        d'annoncer le rang des éléments.
+      -->
+      <ol class="flex flex-col border-t border-line">
+        {etapes.map((e, i) => (
+          <li class="reveal border-b border-line py-9 lg:py-14" style={`animation-delay: ${i * 70}ms`}>
+            <div class="grid gap-x-12 gap-y-4 lg:grid-cols-[5rem_minmax(0,20rem)_minmax(0,1fr)] lg:gap-x-16">
+              <span class="font-display text-[40px] leading-none font-bold tracking-tighter text-accent lg:text-[56px]">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="font-display text-2xl font-bold tracking-tight lg:text-[28px]">{e.titre}</h3>
+              {/*
+                72ch borne la longueur de ligne : sans cette limite, la colonne fait
+                784 px à partir de 1440 px d'écran, soit ~94 caractères par ligne —
+                au-delà des ~75 où l'œil retrouve encore le début de la ligne suivante.
+              */}
+              <div class="flex max-w-[72ch] flex-col gap-4">
+                <p class="text-[17px] leading-relaxed text-muted">{e.texte}</p>
+                <p class="text-[15px] leading-relaxed text-faint">{e.aRemplir}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <p class="mt-10 text-[17px] text-muted">
+        Les chantiers déjà livrés servent de référence pour comparer les matériaux et les
+        finitions :{" "}
+        <a href="/realisations" class="underline decoration-accent decoration-2 underline-offset-4 hover:text-accent">
+          voir nos réalisations
+        </a>.
+      </p>
+    </div>
+  </section>
+
+  <CtaBand title="Un projet d'aménagement extérieur ?">
+    Décrivez-nous votre terrain et ce que vous voulez en faire : nous revenons vers vous
+    avec une proposition chiffrée.
+  </CtaBand>
+</BaseLayout>

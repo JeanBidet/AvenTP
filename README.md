@@ -27,7 +27,7 @@ src/
 ├─ content.config.ts      schéma des fiches chantier (validé au build)
 ├─ data/site.ts           coordonnées, réseaux sociaux, menu, catégories
 ├─ layouts/               BaseLayout (<head>, en-tête, pied de page) et TextLayout (pages de texte)
-├─ pages/                 une page = une URL (index → /, realisations → /realisations)
+├─ pages/                 une page = une URL (index → /, services → /services, realisations → /realisations)
 └─ styles/global.css      thème Tailwind (couleurs, polices) et utilitaires maison
 ```
 
@@ -65,7 +65,9 @@ Ce qui demande des informations que seule l'entreprise a :
 
 - **Remplacer les valeurs entre crochets.** `src/data/site.ts` (téléphone, courriel,
   adresse, clé Web3Forms), `src/pages/index.astro` (phrase d'accroche du bandeau
-  d'accueil, présentation courte), `src/pages/mentions-legales.astro` (raison sociale,
+  d'accueil, présentation courte), `src/pages/services.astro` (gratuité et délai du
+  premier rendez-vous, zone d'intervention, DT-DICT, échantillons, validité du devis,
+  acompte, délais de chantier, garantie décennale), `src/pages/mentions-legales.astro` (raison sociale,
   forme juridique, capital, SIREN/SIRET, RCS, TVA, responsable de publication,
   hébergeur, assurances, médiateur de la consommation),
   `src/pages/confidentialite.astro` (durées de conservation, hébergeur, localisation
