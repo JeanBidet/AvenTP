@@ -74,27 +74,75 @@ const etapes = [
 
       <!--
         Une <ol> parce que l'ordre porte du sens : ces étapes s'enchaînent.
-        Le numéro est affiché en clair plutôt que laissé au marqueur de liste, car
+        Le numéro est écrit en clair plutôt que laissé au marqueur de liste, car
         Tailwind retire `list-style` — sans lui, plusieurs lecteurs d'écran cessent
         d'annoncer le rang des éléments.
       -->
-      <ol class="flex flex-col border-t border-line">
+      <ol class="flex flex-col">
         {etapes.map((e, i) => (
-          <li class="reveal border-b border-line py-9 lg:py-14" style={`animation-delay: ${i * 70}ms`}>
-            <div class="grid gap-x-12 gap-y-4 lg:grid-cols-[5rem_minmax(0,20rem)_minmax(0,1fr)] lg:gap-x-16">
-              <span class="font-display text-[40px] leading-none font-bold tracking-tighter text-accent lg:text-[56px]">
-                {String(i + 1).padStart(2, "0")}
-              </span>
+          <li
+            class="reveal grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 md:grid-cols-[7rem_minmax(0,1fr)] md:gap-x-6 xl:grid-cols-[minmax(0,1fr)_14rem_minmax(0,1fr)] xl:gap-x-0"
+            style={`animation-delay: ${i * 70}ms`}
+          >
+            {/*
+              La rampe du chemin. Le tracé est découpé en un segment par étape plutôt
+              qu'en un seul grand SVG : la hauteur d'une étape dépend de la longueur de
+              son texte, donc elle n'est connue qu'au rendu. Chaque segment remplit sa
+              propre ligne (`absolute inset-0`) et les segments se raccordent parce que
+              le x d'arrivée de l'un est le x de départ du suivant.
+
+              viewBox 0 0 100 100 + preserveAspectRatio="none" : x et y deviennent des
+              pourcentages de la case, quelle que soit sa taille réelle. L'étirement
+              vertical déformerait l'épaisseur du trait, d'où vector-effect
+              non-scaling-stroke qui la fige à 1,5 px à l'écran.
+
+              La courbe est une cubique aux tangentes verticales (les points de contrôle
+              gardent le x de leur extrémité) : elle part et arrive à la verticale, donc
+              le raccord entre deux étapes est lisse, et elle passe exactement par le
+              centre (50, 50) où se pose le point.
+            */}
+            <div class="relative col-start-1 xl:col-start-2">
+              <svg
+                class="absolute inset-0 size-full overflow-visible"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d={i % 2 === 0 ? "M 12 0 C 12 33, 88 67, 88 100" : "M 88 0 C 88 33, 12 67, 12 100"}
+                  stroke="#fff"
+                  stroke-width="1.5"
+                  vector-effect="non-scaling-stroke"
+                  pathLength="100"
+                  class="trace-chemin"
+                />
+              </svg>
+              <span
+                class="absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ring-4 ring-ink"
+                aria-hidden="true"
+              ></span>
+            </div>
+
+            {/*
+              Les étapes n'alternent de part et d'autre du chemin qu'à partir de xl
+              (1280 px). À lg le partage en deux colonnes ramènerait la prose à ~36
+              caractères par ligne ; en dessous, le chemin longe donc le bord gauche et
+              les étapes restent en pile.
+
+              `justify-self-end` colle le bloc de gauche contre la rampe ; le texte, lui,
+              reste aligné à gauche : une colonne de prose alignée à droite se lit mal.
+            */}
+            <div
+              class:list={[
+                "col-start-2 flex max-w-[38rem] flex-col gap-3.5 py-9 lg:py-14 xl:max-w-[34rem]",
+                i % 2 === 0 ? "xl:col-start-3 xl:pl-14" : "xl:col-start-1 xl:justify-self-end xl:pr-14",
+              ]}
+            >
+              <p class="eyebrow">Étape {String(i + 1).padStart(2, "0")}</p>
               <h3 class="font-display text-2xl font-bold tracking-tight lg:text-[28px]">{e.titre}</h3>
-              {/*
-                72ch borne la longueur de ligne : sans cette limite, la colonne fait
-                784 px à partir de 1440 px d'écran, soit ~94 caractères par ligne —
-                au-delà des ~75 où l'œil retrouve encore le début de la ligne suivante.
-              */}
-              <div class="flex max-w-[72ch] flex-col gap-4">
-                <p class="text-[17px] leading-relaxed text-muted">{e.texte}</p>
-                <p class="text-[15px] leading-relaxed text-faint">{e.aRemplir}</p>
-              </div>
+              <p class="text-[17px] leading-relaxed text-muted">{e.texte}</p>
+              <p class="text-[15px] leading-relaxed text-faint">{e.aRemplir}</p>
             </div>
           </li>
         ))}
