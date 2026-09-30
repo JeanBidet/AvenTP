@@ -90,8 +90,8 @@ Ce qui demande des informations que seule l'entreprise a :
 
 - **Remplacer les valeurs entre crochets.** `src/data/site.ts` (téléphone, courriel,
   adresse), `public/envoi.php` (adresses d'envoi), `src/pages/a-propos.astro`
-  (prénom, fonction, parcours, années, chiffres, qualifications, assurances,
-  matériel, citation, et la photo de portrait à déposer dans `src/assets/img/`),
+  (prénom, fonction, deux paragraphes de parcours, trois chiffres, qualifications
+  et assurances, et la photo de portrait à déposer dans `src/assets/img/`),
   `src/pages/index.astro` (phrase d'accroche du bandeau
   d'accueil, présentation courte), `src/pages/services.astro` (gratuité et délai du
   premier rendez-vous, zone d'intervention, DT-DICT, échantillons, validité du devis,

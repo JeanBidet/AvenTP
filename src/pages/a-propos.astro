@@ -1,53 +1,35 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Icon from "../components/Icon.astro";
 import { site } from "../data/site";
 import chantier from "../assets/img/allee-gravier-dalles.jpg";
 
 /**
- * Page de présentation.
+ * Page de présentation, volontairement courte : qui c'est, ce qu'il sait faire,
+ * ce qui le couvre, et où aller ensuite.
  *
- * Tout ce qui relève du parcours réel — prénom, années, formations, matériel —
- * reste entre crochets : ce sont des informations que seule l'entreprise a, et
- * les inventer donnerait une biographie fausse. La mise en page, elle, est
- * complète : il n'y a que du texte à remplacer, aucune structure à refaire.
+ * Tout ce qui relève du parcours réel reste entre crochets : ce sont des
+ * informations que seule l'entreprise a, et les inventer donnerait une biographie
+ * fausse sur la page même censée établir la confiance.
  */
 
 const chiffres = [
   { valeur: "[X]", libelle: "années de métier" },
   { valeur: "[X]", libelle: "chantiers livrés" },
   { valeur: "[X] km", libelle: "autour de [Ville]" },
-  { valeur: "[X]", libelle: "personnes sur le terrain" },
-];
-
-const parcours = [
-  { annee: "[Année]", titre: "[Formation]", texte: "[Diplôme ou apprentissage : CAP/BP aménagements paysagers, conduite d'engins, maçonnerie paysagère…]" },
-  { annee: "[Année]", titre: "[Premières années sur le terrain]", texte: "[Chez qui, sur quel type de chantiers, ce qu'il y a appris.]" },
-  { annee: "[Année]", titre: "[Étape marquante]", texte: "[Spécialisation, premier gros chantier, achat du premier engin…]" },
-  { annee: "[Année]", titre: `Création d'${site.name}`, texte: "[Pourquoi s'installer à son compte, et ce qu'il voulait faire autrement.]" },
 ];
 
 const qualifications = [
   "[CAP / BP aménagements paysagers]",
   "[CACES conduite d'engins]",
-  "[Certiphyto]",
-  "[Assurance décennale — compagnie et n° de contrat]",
+  "[Assurance décennale]",
   "[Responsabilité civile professionnelle]",
-];
-
-const materiel = [
-  "[Mini-pelle — marque et tonnage]",
-  "[Chargeuse ou dumper]",
-  "[Plaque vibrante, pilonneuse]",
-  "[Remorque, camion benne]",
-  "[Outillage de finition]",
 ];
 ---
 
 <BaseLayout
   title="À propos"
-  description={`Qui est derrière ${site.name} : parcours, savoir-faire et façon de travailler d'une entreprise de paysagisme et de terrassement.`}
+  description={`Qui est derrière ${site.name} : parcours et savoir-faire d'une entreprise de paysagisme et de terrassement.`}
 >
   <section class="border-b border-neutral-800 pt-16 pb-8 lg:pt-24 lg:pb-12">
     <div class="container-site flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
@@ -58,29 +40,24 @@ const materiel = [
         </h1>
       </div>
       <p class="max-w-[460px] text-[17px] text-muted">
-        [Une ou deux phrases d'accroche : ce qui distingue l'entreprise, son rapport au
-        métier, sa manière d'aborder un chantier.]
+        [Une phrase d'accroche : ce qui distingue l'entreprise, ou son rapport au métier.]
       </p>
     </div>
   </section>
 
-  <!-- Portrait et présentation -->
-  <section class="py-14 lg:py-24" aria-labelledby="portrait-titre">
-    <div class="container-site grid gap-12 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-20">
+  <section class="py-14 lg:py-20" aria-labelledby="portrait-titre">
+    <div class="container-site grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
       {/*
-        Emplacement du portrait. Volontairement laissé vide plutôt que rempli par une
-        photo d'agence : une fausse tête sur une page qui raconte un vrai parcours se
-        repère au premier coup d'œil. Le cadre respecte déjà la proportion finale, il
-        n'y aura qu'à déposer le fichier.
+        Emplacement du portrait, laissé vide plutôt que rempli par une photo
+        d'agence : une tête d'inconnu sur une page qui raconte un vrai parcours se
+        repère au premier coup d'œil. Le cadre tient déjà la proportion finale.
       */}
-      <div class="lg:sticky lg:top-32 lg:self-start">
-        <div class="flex aspect-[4/5] flex-col items-center justify-center gap-5 rounded-2xl border border-dashed border-line-strong bg-card px-8 text-center">
-          <span class="h-px w-12 bg-line-strong" aria-hidden="true"></span>
-          <p class="text-[15px] leading-relaxed text-faint">
-            [PHOTO — portrait sur un chantier, cadrage vertical, 1200 × 1500 px environ.
-            À déposer dans <code class="text-muted">src/assets/img/</code>.]
-          </p>
-        </div>
+      <div class="flex aspect-[4/5] flex-col items-center justify-center gap-5 rounded-2xl border border-dashed border-line-strong bg-card px-8 text-center">
+        <span class="h-px w-12 bg-line-strong" aria-hidden="true"></span>
+        <p class="text-[15px] leading-relaxed text-faint">
+          [PHOTO — portrait sur un chantier, cadrage vertical, 1200 × 1500 px environ.
+          À déposer dans <code class="text-muted">src/assets/img/</code>.]
+        </p>
       </div>
 
       <div class="flex flex-col gap-7">
@@ -88,95 +65,42 @@ const materiel = [
           <h2 id="portrait-titre" class="font-display text-[32px] leading-tight font-bold tracking-tight lg:text-[42px]">
             [Prénom Nom]
           </h2>
-          <p class="text-[17px] font-semibold text-accent">[Fonction — gérant, artisan paysagiste, chef d'entreprise…]</p>
+          <p class="text-[17px] font-semibold text-accent">[Fonction — gérant, artisan paysagiste…]</p>
         </div>
 
-        <div class="flex max-w-[60ch] flex-col gap-5 text-[17px] leading-relaxed text-muted">
+        <div class="flex max-w-[58ch] flex-col gap-5 text-[17px] leading-relaxed text-muted">
           <p>
-            [Parcours en quelques phrases : où il a appris le métier, combien d'années sur
-            le terrain, les types de chantiers qui l'ont formé.]
+            [Où il a appris le métier, combien d'années sur le terrain, les types de
+            chantiers qui l'ont formé.]
           </p>
           <p>
-            [Ce qui l'a décidé à créer l'entreprise, et en quelle année. Ce qu'il voulait
-            faire autrement.]
-          </p>
-          <p>
-            [Ce qu'il préfère dans le métier : le terrassement, le dessin d'un jardin, la
-            pierre… Ce détail-là vaut plus que dix lignes de généralités.]
+            [Ce qui l'a décidé à créer l'entreprise et en quelle année, et ce qu'il
+            préfère dans le métier. Ce détail-là vaut plus que dix lignes de
+            généralités.]
           </p>
         </div>
 
-        {/* Citation : c'est elle qui donne une voix à la page. */}
-        <blockquote class="relative mt-2 max-w-[52ch] border-l-2 border-accent pl-7">
-          <p class="font-display text-[22px] leading-snug font-medium text-white lg:text-[26px]">
-            « [Une phrase à lui, sur sa façon de travailler ou sur ce qu'il refuse de
-            bâcler.] »
-          </p>
-        </blockquote>
+        <dl class="mt-1 grid grid-cols-3 gap-x-6 border-t border-line pt-7">
+          {chiffres.map((c) => (
+            <div class="flex flex-col gap-1.5">
+              <dt class="font-display text-[30px] leading-none font-bold tracking-tighter text-accent lg:text-[38px]">{c.valeur}</dt>
+              <dd class="text-[14px] leading-snug text-muted">{c.libelle}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div class="flex flex-col gap-3.5 border-t border-line pt-7">
+          <p class="text-sm text-neutral-400">Qualifications et assurances</p>
+          <ul class="flex flex-wrap gap-2.5">
+            {qualifications.map((q) => (
+              <li class="rounded-full border border-line-strong px-4 py-2 text-[14px] text-muted">{q}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Chiffres -->
-  <section class="border-y border-line bg-surface py-12 lg:py-16" aria-label="Quelques chiffres">
-    <div class="container-site grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
-      {chiffres.map((c) => (
-        <div class="flex flex-col gap-2">
-          <p class="font-display text-[38px] leading-none font-bold tracking-tighter text-accent lg:text-[52px]">{c.valeur}</p>
-          <p class="text-[15px] text-muted">{c.libelle}</p>
-        </div>
-      ))}
-    </div>
-  </section>
-
-  <!-- Parcours -->
-  <section class="py-16 lg:py-24" aria-labelledby="parcours-titre">
-    <div class="container-site">
-      <div class="mb-10 flex flex-col gap-3.5 lg:mb-16">
-        <p class="eyebrow">Parcours</p>
-        <h2 id="parcours-titre" class="font-display text-[34px] font-bold tracking-tight lg:text-[44px]">
-          Le chemin jusqu'ici
-        </h2>
-      </div>
-
-      <ol class="flex flex-col">
-        {parcours.map((e, i) => (
-          <li class="reveal grid gap-x-10 gap-y-3 border-t border-line py-8 lg:grid-cols-[8rem_minmax(0,22rem)_minmax(0,1fr)] lg:gap-x-16 lg:py-11" style={`animation-delay: ${i * 70}ms`}>
-            <p class="font-display text-lg font-bold tracking-tight text-accent">{e.annee}</p>
-            <h3 class="font-display text-xl font-bold tracking-tight lg:text-2xl">{e.titre}</h3>
-            <p class="max-w-[62ch] text-[17px] leading-relaxed text-muted">{e.texte}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <!-- Qualifications et matériel -->
-  <section class="pb-16 lg:pb-24" aria-labelledby="moyens-titre">
-    <div class="container-site">
-      <h2 id="moyens-titre" class="sr-only">Qualifications et matériel</h2>
-      <div class="grid gap-10 lg:grid-cols-2 lg:gap-20">
-        {[
-          { titre: "Qualifications et assurances", items: qualifications },
-          { titre: "Le matériel", items: materiel },
-        ].map((bloc) => (
-          <div class="flex flex-col gap-6 rounded-2xl border border-line bg-card p-8 lg:p-10">
-            <h3 class="font-display text-2xl font-bold tracking-tight">{bloc.titre}</h3>
-            <ul class="flex flex-col gap-3.5 text-[16px] leading-relaxed text-muted">
-              {bloc.items.map((item) => (
-                <li class="flex items-start gap-3.5">
-                  <Icon name="check" class="mt-1 size-4.5 shrink-0 text-accent" strokeWidth={2.5} />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Bande photo et renvoi vers les réalisations -->
   <section class="relative isolate overflow-hidden bg-[#0b1f1e]" aria-labelledby="voir-titre">
     <Image
       src={chantier}
@@ -186,8 +110,8 @@ const materiel = [
       quality={60}
       class="absolute inset-0 -z-10 size-full object-cover opacity-35"
     />
-    <div class="container-site flex flex-col items-start gap-6 py-20 lg:py-28">
-      <h2 id="voir-titre" class="max-w-[16ch] font-display text-[32px] leading-tight font-bold tracking-tight lg:text-[44px]">
+    <div class="container-site flex flex-col items-start gap-6 py-16 lg:py-24">
+      <h2 id="voir-titre" class="max-w-[16ch] font-display text-[30px] leading-tight font-bold tracking-tight lg:text-[42px]">
         Le travail parle mieux que la page qui le décrit.
       </h2>
       <div class="flex flex-wrap gap-3">
