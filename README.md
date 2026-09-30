@@ -73,6 +73,11 @@ Ce qui demande des informations que seule l'entreprise a :
   `src/pages/confidentialite.astro` (durées de conservation, hébergeur, localisation
   des serveurs de Web3Forms) et les fiches de `src/content/realisations/`
   (`[Ville]`, `[Année]`).
+- **Souscrire l'offre payante Web3Forms si vous voulez recevoir les photos.** Les
+  pièces jointes sont une fonction Pro : avec une clé gratuite, le reste du
+  formulaire part normalement mais les photos ne sont pas transmises. Sans
+  abonnement, retirer le bloc « Photos du terrain » de `src/pages/devis.astro`
+  plutôt que de laisser un champ sans effet.
 - **Valider les tranches de budget** du formulaire (`src/pages/devis.astro`, tableau
   `budgets`) : ce sont des propositions, et elles annoncent implicitement un
   positionnement tarifaire.
