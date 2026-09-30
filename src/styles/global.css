@@ -124,33 +124,8 @@
 .js .reveal { opacity: 0; }
 .js .reveal.is-visible { animation: var(--animate-fade-up); }
 
-/*
-  Le chemin de la page Services : chaque segment se dessine quand son étape entre
-  dans l'écran, en réutilisant le .is-visible déjà posé par l'observateur.
-
-  `pathLength="100"` dans le SVG renumérote la longueur du tracé sur 100, quelle que
-  soit sa longueur réelle : un seul stroke-dasharray convient donc aux cinq segments,
-  alors qu'ils n'ont pas la même hauteur. Le tiret couvre tout le tracé et on le fait
-  glisser de 100 (hors champ) à 0 (en place).
-
-  Comme pour .reveal, l'état masqué n'existe que si JS tourne : sans lui l'observateur
-  ne passe jamais, et un trait resté à dashoffset 100 serait invisible pour toujours.
-*/
-.js .trace-chemin {
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-}
-.js .reveal.is-visible .trace-chemin {
-  animation: tracer 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
-@keyframes tracer {
-  to { stroke-dashoffset: 0; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .js .reveal { opacity: 1; }
   .js .reveal.is-visible { animation: none; }
-  .js .trace-chemin { stroke-dashoffset: 0; }
-  .js .reveal.is-visible .trace-chemin { animation: none; }
 }
