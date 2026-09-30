@@ -27,7 +27,7 @@ src/
 ├─ content.config.ts      schéma des fiches chantier (validé au build)
 ├─ data/site.ts           coordonnées, réseaux sociaux, menu, catégories
 ├─ layouts/               BaseLayout (<head>, en-tête, pied de page) et TextLayout (pages de texte)
-├─ pages/                 une page = une URL (index → /, services, devis, realisations…)
+├─ pages/                 une page = une URL (index → /, services, a-propos, devis, realisations…)
 └─ styles/global.css      thème Tailwind (couleurs, polices) et utilitaires maison
 ```
 
@@ -89,7 +89,10 @@ php -S localhost:8000 -t dist   # le formulaire fonctionne, l'envoi dépend du s
 Ce qui demande des informations que seule l'entreprise a :
 
 - **Remplacer les valeurs entre crochets.** `src/data/site.ts` (téléphone, courriel,
-  adresse), `public/envoi.php` (adresses d'envoi), `src/pages/index.astro` (phrase d'accroche du bandeau
+  adresse), `public/envoi.php` (adresses d'envoi), `src/pages/a-propos.astro`
+  (prénom, fonction, parcours, années, chiffres, qualifications, assurances,
+  matériel, citation, et la photo de portrait à déposer dans `src/assets/img/`),
+  `src/pages/index.astro` (phrase d'accroche du bandeau
   d'accueil, présentation courte), `src/pages/services.astro` (gratuité et délai du
   premier rendez-vous, zone d'intervention, DT-DICT, échantillons, validité du devis,
   acompte, délais de chantier, garantie décennale), `src/pages/mentions-legales.astro` (raison sociale,

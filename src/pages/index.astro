@@ -4,7 +4,6 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SectionHeading from "../components/SectionHeading.astro";
 import Carousel from "../components/Carousel.astro";
-import CtaBand from "../components/CtaBand.astro";
 import Contact from "../components/Contact.astro";
 import Icon from "../components/Icon.astro";
 
@@ -133,10 +132,6 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
       <Carousel projects={featured} />
     </div>
   </section>
-
-  <CtaBand id="apropos" title="Un projet d'aménagement extérieur ?">
-    [Présentation courte : années d'expérience, zone d'intervention, équipe, matériel.]
-  </CtaBand>
 
   <Contact />
 </BaseLayout>
