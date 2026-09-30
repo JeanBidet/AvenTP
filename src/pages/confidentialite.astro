@@ -1,7 +1,7 @@
 ---
 /**
  * Politique de confidentialité (RGPD). Le site est statique et ne dépose aucun cookie ;
- * la seule collecte de données est le formulaire de contact, relayé par Web3Forms.
+ * la seule collecte de données est le formulaire de devis, reçu par notre hébergeur.
  * Valeurs entre crochets à compléter, notamment la durée de conservation retenue.
  */
 import TextLayout from "../layouts/TextLayout.astro";
@@ -54,14 +54,11 @@ import { site } from "../data/site";
       Les personnes de {site.name} chargées du suivi des demandes.
     </li>
     <li>
-      <strong>Web3Forms</strong>, qui relaie le formulaire vers notre boîte de courriel :
-      le site étant statique, il n'a pas de serveur pour le recevoir. Ce prestataire agit
-      comme sous-traitant au sens du RGPD. Localisation des serveurs et garanties en cas
-      de transfert hors Union européenne : [À VÉRIFIER DANS LE CONTRAT WEB3FORMS].
-    </li>
-    <li>
-      <strong>[NOM DE L'HÉBERGEUR]</strong>, qui héberge le site et journalise les accès
-      techniques.
+      <strong>[NOM DE L'HÉBERGEUR]</strong>, qui héberge le site, reçoit le formulaire et
+      achemine le courriel, et qui journalise les accès techniques. Il agit comme
+      sous-traitant au sens du RGPD. Aucun autre prestataire n'intervient : le formulaire
+      n'est relayé par aucun service tiers, et les photos ne transitent que par cet
+      hébergeur.
     </li>
   </ul>
 

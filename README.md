@@ -59,34 +59,53 @@ Les couleurs sont déclarées une seule fois dans `src/styles/global.css` (`@the
 noir `#000`, blanc `#fff`, accent `#49c5b6`. L'accent sert de fond, de trait ou de
 texte **sur fond noir** (contraste ≈ 10:1), jamais de texte sur fond blanc (≈ 2,1:1).
 
+## Le formulaire de devis
+
+Le site est statique, mais l'hébergement web OVH exécute PHP : le formulaire est donc
+reçu par **`public/envoi.php`**, déposé avec le reste du site. Aucun service tiers
+n'intervient, ce qui évite l'abonnement que facturent les relais de formulaires pour
+les pièces jointes, et leur plafond de 5 à 10 Mo.
+
+- Les photos sont **réduites dans le navigateur** (2400 px sur le grand côté, JPEG
+  qualité 0,85) avant l'envoi, puis jointes à l'email. Huit au maximum.
+- Les limites PHP sont dans **`public/.user.ini`** (fichier lu par OVH). Si l'envoi
+  échoue sur des photos volumineuses, c'est `upload_max_filesize` et `post_max_size`
+  qu'il faut remonter — `post_max_size` doit rester supérieur au total attendu, sinon
+  PHP vide la requête sans prévenir.
+- Le script demande **PHP 8.1 ou plus** (type de retour `never`). La version PHP se
+  choisit dans l'espace client OVH ou via un fichier `.ovhconfig`.
+- En cas de refus, `envoi.php` renvoie sur `/devis/?erreur=…` et la page affiche le
+  message correspondant.
+
+Pour tester en local, un serveur PHP suffit :
+
+```bash
+npm run build
+php -S localhost:8000 -t dist   # le formulaire fonctionne, l'envoi dépend du système
+```
+
 ## À faire avant la mise en ligne
 
 Ce qui demande des informations que seule l'entreprise a :
 
 - **Remplacer les valeurs entre crochets.** `src/data/site.ts` (téléphone, courriel,
-  adresse, clé Web3Forms), `src/pages/index.astro` (phrase d'accroche du bandeau
+  adresse), `public/envoi.php` (adresses d'envoi), `src/pages/index.astro` (phrase d'accroche du bandeau
   d'accueil, présentation courte), `src/pages/services.astro` (gratuité et délai du
   premier rendez-vous, zone d'intervention, DT-DICT, échantillons, validité du devis,
   acompte, délais de chantier, garantie décennale), `src/pages/mentions-legales.astro` (raison sociale,
   forme juridique, capital, SIREN/SIRET, RCS, TVA, responsable de publication,
   hébergeur, assurances, médiateur de la consommation),
-  `src/pages/confidentialite.astro` (durées de conservation, hébergeur, localisation
-  des serveurs de Web3Forms) et les fiches de `src/content/realisations/`
+  `src/pages/confidentialite.astro` (durées de conservation, hébergeur) et les
+  fiches de `src/content/realisations/`
   (`[Ville]`, `[Année]`).
-- **Souscrire l'offre payante Web3Forms si vous voulez recevoir les photos.** Les
-  pièces jointes sont une fonction Pro : avec une clé gratuite, le reste du
-  formulaire part normalement mais les photos ne sont pas transmises. Sans
-  abonnement, retirer le bloc « Photos du terrain » de `src/pages/devis.astro`
-  plutôt que de laisser un champ sans effet.
 - **Valider les tranches de budget** du formulaire (`src/pages/devis.astro`, tableau
   `budgets`) : ce sont des propositions, et elles annoncent implicitement un
   positionnement tarifaire.
-- **Créer la clé Web3Forms** sur [web3forms.com](https://web3forms.com) et la coller
-  dans `site.formAccessKey`, puis envoyer un message de test : sans clé valide, le
-  formulaire de contact ne part pas. Au premier test, vérifier que les cases
-  « Type d'aménagement » cochées arrivent bien toutes dans l'email : elles
-  partagent un même `name`, et tous les relais ne regroupent pas les valeurs
-  multiples de la même façon.
+- **Renseigner les deux adresses de `public/envoi.php`** : `DESTINATAIRE` (la boîte
+  qui reçoit les demandes) et `EXPEDITEUR`, qui doit être une adresse **du domaine
+  hébergé chez OVH**. Une adresse extérieure (gmail, orange…) ferait passer le
+  message pour une usurpation et l'enverrait en indésirables. Envoyer ensuite une
+  demande de test avec des photos.
 - **Remplacer les illustrations** `illu-*.svg` par de vraies photos de chantiers
   (deux des cinq dalles photo de l'accueil en sont encore), et s'assurer de détenir
   les droits sur toutes les photos.
@@ -97,6 +116,6 @@ Ce qui demande des informations que seule l'entreprise a :
 - **Renseigner les liens des réseaux sociaux** dans `site.socials` (ils pointent
   sur `#`), ou retirer les entrées inutiles.
 
-Déjà en place : formulaire relié à Web3Forms avec page de confirmation `/merci`,
+Déjà en place : formulaire reçu par `public/envoi.php` avec page de confirmation `/merci`,
 mentions légales et politique de confidentialité reliées au pied de page,
 `sitemap-index.xml`, `robots.txt`, image de partage et balises Open Graph.

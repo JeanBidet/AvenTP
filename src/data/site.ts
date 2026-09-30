@@ -11,12 +11,6 @@ export const site = {
   phoneHref: "tel:+33000000000",
   email: "[EMAIL]",
   address: "[ADRESSE, CODE POSTAL, VILLE]",
-  /**
-   * Clé publique Web3Forms, à créer sur https://web3forms.com (gratuit, sans compte :
-   * la clé arrive par email). C'est ce service qui transfère le formulaire de contact
-   * vers `email`, puisque le site est statique et n'a pas de serveur à lui.
-   */
-  formAccessKey: "[CLÉ_WEB3FORMS]",
   socials: [
     { name: "Facebook", icon: "facebook", href: "#" },
     { name: "Instagram", icon: "instagram", href: "#" },

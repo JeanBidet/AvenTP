@@ -6,9 +6,14 @@ import { site, categories } from "../data/site";
 /**
  * Page dédiée à la demande de devis.
  *
- * Le formulaire part chez Web3Forms, comme celui de l'accueil auparavant : le site
- * est statique, il n'a pas de serveur pour recevoir un POST. Le service renvoie
- * lui-même le visiteur sur /merci, donc aucun JavaScript n'est nécessaire.
+ * Le formulaire est reçu par `public/envoi.php`, déposé sur l'hébergement OVH avec
+ * le reste du site. Le site reste statique : PHP ne sert qu'à cette page. C'est ce
+ * qui permet de recevoir les photos en pleine qualité, là où les relais tiers
+ * facturent les pièces jointes et les plafonnent à 5 ou 10 Mo.
+ *
+ * Les noms de champs sont en ASCII sans espace : PHP remplace espaces et points par
+ * des underscores dans les clés de $_POST, ce qui ferait disparaître un champ nommé
+ * « Type d'aménagement ». Les libellés lisibles sont reconstruits dans envoi.php.
  */
 
 // Types d'aménagement : repris des catégories de réalisations, pour que le
@@ -39,13 +44,17 @@ const origines = [
 ];
 
 /**
- * Réduction des photos avant envoi. Web3Forms n'accepte qu'un fichier de 5 Mo au
- * maximum, alors qu'une photo de téléphone en pèse couramment 3 à 12 : sans cette
- * réduction, la pièce jointe serait refusée la plupart du temps.
+ * Réduction des photos avant envoi. Les limites reprennent celles de
+ * `public/envoi.php` et `public/.user.ini` : c'est notre hébergement, donc elles
+ * sont bien plus larges que ce qu'accorde un relais tiers.
+ *
+ * On réduit malgré tout, pour deux raisons : huit photos à pleine définition
+ * dépasseraient `post_max_size`, et l'email deviendrait trop lourd à ouvrir sur un
+ * téléphone. 2400 px sur le grand côté suffit largement à juger un terrain.
  */
-const MAX_PHOTOS = 4;
-const MAX_COTE = 1600;   // px sur le plus grand côté
-const MAX_OCTETS = 4_500_000;  // marge sous la limite de 5 Mo du service
+const MAX_PHOTOS = 8;
+const MAX_COTE = 2400;   // px sur le plus grand côté
+const MAX_OCTETS = 10_000_000;  // = MAX_OCTETS_PAR_PHOTO dans envoi.php
 
 const field =
   "w-full rounded-md border border-neutral-700 bg-ink px-4 py-3.5 text-base text-white focus:border-accent focus:outline-none";
@@ -108,104 +117,115 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
         </div>
       </div>
 
-      <form
-        class="flex max-w-[46rem] flex-col gap-7"
-        method="POST"
-        action="https://api.web3forms.com/submit"
-        enctype="multipart/form-data"
-      >
-        <input type="hidden" name="access_key" value={site.formAccessKey} />
-        <input type="hidden" name="subject" value={`Demande de devis — ${site.name}`} />
-        <input type="hidden" name="redirect" value={new URL("/merci", Astro.site).href} />
-        <!-- Piège à robots : un humain ne voit pas ce champ, donc ne le remplit jamais. -->
-        <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" aria-hidden="true" />
-
-        <div class="grid gap-5 sm:grid-cols-2">
-          <label class={label}>Nom
-            <input class={field} type="text" name="Nom" autocomplete="name" required />
-          </label>
-          <label class={label}>Téléphone
-            <input class={field} type="tel" name="Téléphone" autocomplete="tel" />
-          </label>
-        </div>
-        <label class={label}>Email
-          <input class={field} type="email" name="Email" autocomplete="email" required />
-        </label>
-
+      <div class="flex max-w-[46rem] flex-col gap-7">
         {/*
-          Cases à cocher et non liste déroulante : un chantier combine souvent
-          plusieurs postes (une terrasse et l'allée qui y mène). Le <fieldset> et
-          sa <legend> remplacent ici le <label>, qui ne peut désigner qu'un champ.
+          envoi.php renvoie ici avec ?erreur=… quand il refuse la demande. La page
+          étant statique, c'est le script du bas de page qui choisit le message.
+          Sans JavaScript le visiteur retrouve son formulaire : moins explicite,
+          mais rien n'est perdu.
         */}
-        <fieldset class="flex flex-col gap-3 border-0 p-0">
-          <legend class="mb-1 text-sm text-neutral-300">Type d'aménagement <span class="text-faint">(plusieurs choix possibles)</span></legend>
-          <div class="grid gap-x-5 gap-y-3 sm:grid-cols-2">
-            {typesAmenagement.map((t) => (
-              <label class="flex items-center gap-3 text-[15px]">
-                <input type="checkbox" name="Type d'aménagement" value={t} class="size-4.5 shrink-0 accent-accent" />
-                {t}
-              </label>
-            ))}
+        <p
+          data-erreur
+          role="alert"
+          class="hidden rounded-md border border-accent bg-card px-5 py-4 text-[15px] leading-relaxed text-white"
+        ></p>
+
+        <form
+          class="flex flex-col gap-7"
+          method="POST"
+          action="/envoi.php"
+          enctype="multipart/form-data"
+        >
+          <!-- Piège à robots : un humain ne voit pas ce champ, donc ne le remplit jamais. -->
+          <input type="text" name="site_web" class="hidden" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class={label}>Nom
+              <input class={field} type="text" name="nom" autocomplete="name" required />
+            </label>
+            <label class={label}>Téléphone
+              <input class={field} type="tel" name="telephone" autocomplete="tel" />
+            </label>
           </div>
-        </fieldset>
-
-        <div class="grid gap-5 sm:grid-cols-2">
-          <label class={label}>Budget envisagé
-            <select class={field} name="Budget">
-              <option value="">Non précisé</option>
-              {budgets.map((b) => <option value={b}>{b}</option>)}
-            </select>
+          <label class={label}>Email
+            <input class={field} type="email" name="email" autocomplete="email" required />
           </label>
-          <label class={label}>Comment nous connaissez-vous ?
-            <select class={field} name="Comment nous connaissez-vous">
-              <option value="">Non précisé</option>
-              {origines.map((o) => <option value={o}>{o}</option>)}
-            </select>
+
+          {/*
+            Cases à cocher et non liste déroulante : un chantier combine souvent
+            plusieurs postes (une terrasse et l'allée qui y mène). Le <fieldset> et
+            sa <legend> remplacent ici le <label>, qui ne peut désigner qu'un champ.
+          */}
+          <fieldset class="flex flex-col gap-3 border-0 p-0">
+            <legend class="mb-1 text-sm text-neutral-300">Type d'aménagement <span class="text-faint">(plusieurs choix possibles)</span></legend>
+            <div class="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+              {typesAmenagement.map((t) => (
+                <label class="flex items-center gap-3 text-[15px]">
+                  <input type="checkbox" name="amenagement[]" value={t} class="size-4.5 shrink-0 accent-accent" />
+                  {t}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class={label}>Budget envisagé
+              <select class={field} name="budget">
+                <option value="">Non précisé</option>
+                {budgets.map((b) => <option value={b}>{b}</option>)}
+              </select>
+            </label>
+            <label class={label}>Comment nous connaissez-vous ?
+              <select class={field} name="origine">
+                <option value="">Non précisé</option>
+                {origines.map((o) => <option value={o}>{o}</option>)}
+              </select>
+            </label>
+          </div>
+
+          {/*
+            Photos du terrain. `accept="image/*"` fait proposer l'appareil photo sur
+            mobile, ce qui est le cas d'usage principal : on photographie son terrain
+            sur place. Le script en bas de page réduit les images avant l'envoi.
+          */}
+          <fieldset class="flex flex-col gap-3 border-0 p-0">
+            <legend class="mb-1 text-sm text-neutral-300">
+              Photos du terrain <span class="text-faint">(facultatif, {MAX_PHOTOS} maximum)</span>
+            </legend>
+            <input
+              id="photos"
+              type="file"
+              name="photos[]"
+              accept="image/*"
+              multiple
+              data-photos
+              class="w-full cursor-pointer rounded-md border border-dashed border-neutral-700 bg-ink p-4 text-sm text-neutral-300 file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:bg-neutral-800 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:border-accent"
+            />
+            <p class="text-[13px] leading-relaxed text-faint">
+              Une vue d'ensemble et un détail valent souvent mieux qu'un long paragraphe.
+              Les images sont réduites dans votre navigateur avant l'envoi.
+            </p>
+            <ul data-photos-liste class="hidden flex-col gap-1.5 text-[13px] text-muted"></ul>
+            <p data-photos-erreur class="hidden text-[13px] font-semibold text-accent" role="alert"></p>
+          </fieldset>
+
+          <label class={label}>Votre projet
+            <textarea class:list={[field, "min-h-40 resize-y"]} name="projet" rows="6" required
+              placeholder="Surface approximative, état actuel du terrain, délai souhaité…"></textarea>
           </label>
-        </div>
 
-        {/*
-          Photos du terrain. `accept="image/*"` fait proposer l'appareil photo sur
-          mobile, ce qui est le cas d'usage principal : on photographie son terrain
-          sur place. Le script en bas de page réduit les images avant l'envoi.
-        */}
-        <fieldset class="flex flex-col gap-3 border-0 p-0">
-          <legend class="mb-1 text-sm text-neutral-300">
-            Photos du terrain <span class="text-faint">(facultatif, {MAX_PHOTOS} maximum)</span>
-          </legend>
-          <input
-            id="photos"
-            type="file"
-            name="Photos"
-            accept="image/*"
-            multiple
-            data-photos
-            class="w-full cursor-pointer rounded-md border border-dashed border-neutral-700 bg-ink p-4 text-sm text-neutral-300 file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:bg-neutral-800 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:border-accent"
-          />
-          <p class="text-[13px] leading-relaxed text-faint">
-            Une vue d'ensemble et un détail valent souvent mieux qu'un long paragraphe.
-            Les images sont réduites dans votre navigateur avant l'envoi.
-          </p>
-          <ul data-photos-liste class="hidden flex-col gap-1.5 text-[13px] text-muted"></ul>
-          <p data-photos-erreur class="hidden text-[13px] font-semibold text-accent" role="alert"></p>
-        </fieldset>
+          <label class="flex items-start gap-3 text-sm text-neutral-400">
+            <input type="checkbox" name="consentement" value="oui" required
+              class="mt-0.5 size-4.5 shrink-0 accent-accent" />
+            <span>
+              J'accepte que ces informations soient utilisées pour être recontacté au sujet de
+              ma demande (<a href="/confidentialite" class="underline hover:text-accent">politique de confidentialité</a>).
+            </span>
+          </label>
 
-        <label class={label}>Votre projet
-          <textarea class:list={[field, "min-h-40 resize-y"]} name="Projet" rows="6" required
-            placeholder="Surface approximative, état actuel du terrain, délai souhaité…"></textarea>
-        </label>
-
-        <label class="flex items-start gap-3 text-sm text-neutral-400">
-          <input type="checkbox" name="Consentement" value="oui" required
-            class="mt-0.5 size-4.5 shrink-0 accent-accent" />
-          <span>
-            J'accepte que ces informations soient utilisées pour être recontacté au sujet de
-            ma demande (<a href="/confidentialite" class="underline hover:text-accent">politique de confidentialité</a>).
-          </span>
-        </label>
-
-        <button type="submit" class="btn-accent self-start">Envoyer la demande</button>
-      </form>
+          <button type="submit" class="btn-accent self-start">Envoyer la demande</button>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -214,6 +234,24 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
     // frontmatter et injectées ici, pour que le texte affiché et le contrôle réel ne
     // puissent pas se contredire.
     document.addEventListener("astro:page-load", () => {
+      // envoi.php renvoie ici avec ?erreur=… : on traduit le code en phrase.
+      const bandeau = document.querySelector("[data-erreur]");
+      const code = new URLSearchParams(location.search).get("erreur");
+      const messages = {
+        champs: "Il manque le nom, l'adresse électronique ou la description du projet.",
+        consentement: "Il faut cocher la case d'accord pour que nous puissions vous répondre.",
+        nombre: `Trop de photos : ${MAX_PHOTOS} au maximum.`,
+        poids: "Une des photos est trop lourde. Réessayez : elles sont réduites automatiquement.",
+        format: "Un des fichiers n'est pas une image. Formats acceptés : JPEG, PNG, WebP, HEIC.",
+        photo: "L'envoi des photos a échoué. Réessayez avec moins de photos.",
+        envoi: "L'envoi a échoué de notre côté. Réessayez, ou appelez-nous directement.",
+      };
+      if (bandeau && code && messages[code]) {
+        bandeau.textContent = messages[code];
+        bandeau.classList.remove("hidden");
+        bandeau.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+
       const input = document.querySelector("[data-photos]");
       if (!input) return;
       const liste = document.querySelector("[data-photos-liste]");
@@ -254,7 +292,7 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
                 resolve(new File([blob], nom, { type: "image/jpeg" }));
               },
               "image/jpeg",
-              0.8,
+              0.85,
             );
           };
           img.onerror = () => {
