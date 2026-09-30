@@ -23,7 +23,7 @@ export const nav = [
   { label: "Services", href: "/services" },
   { label: "Réalisations", href: "/realisations" },
   { label: "À propos", href: "/a-propos" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Contact", href: "/devis" },
 ] as const;
 
 /** Catégories de réalisations : l'ordre ici est l'ordre des filtres. */
