@@ -27,7 +27,7 @@ src/
 ├─ content.config.ts      schéma des fiches chantier (validé au build)
 ├─ data/site.ts           coordonnées, réseaux sociaux, menu, catégories
 ├─ layouts/               BaseLayout (<head>, en-tête, pied de page) et TextLayout (pages de texte)
-├─ pages/                 une page = une URL (index → /, services → /services, realisations → /realisations)
+├─ pages/                 une page = une URL (index → /, services, devis, realisations…)
 └─ styles/global.css      thème Tailwind (couleurs, polices) et utilitaires maison
 ```
 
@@ -73,9 +73,15 @@ Ce qui demande des informations que seule l'entreprise a :
   `src/pages/confidentialite.astro` (durées de conservation, hébergeur, localisation
   des serveurs de Web3Forms) et les fiches de `src/content/realisations/`
   (`[Ville]`, `[Année]`).
+- **Valider les tranches de budget** du formulaire (`src/pages/devis.astro`, tableau
+  `budgets`) : ce sont des propositions, et elles annoncent implicitement un
+  positionnement tarifaire.
 - **Créer la clé Web3Forms** sur [web3forms.com](https://web3forms.com) et la coller
   dans `site.formAccessKey`, puis envoyer un message de test : sans clé valide, le
-  formulaire de contact ne part pas.
+  formulaire de contact ne part pas. Au premier test, vérifier que les cases
+  « Type d'aménagement » cochées arrivent bien toutes dans l'email : elles
+  partagent un même `name`, et tous les relais ne regroupent pas les valeurs
+  multiples de la même façon.
 - **Remplacer les illustrations** `illu-*.svg` par de vraies photos de chantiers
   (deux des cinq dalles photo de l'accueil en sont encore), et s'assurer de détenir
   les droits sur toutes les photos.

@@ -2,9 +2,14 @@
 import Icon from "./Icon.astro";
 import { site } from "../data/site";
 
-const field =
-  "w-full rounded-md border border-neutral-700 bg-ink px-4 py-3.5 text-base text-white focus:border-accent focus:outline-none";
-const label = "flex flex-col gap-2 text-sm text-neutral-300";
+/**
+ * Bloc contact de l'accueil : coordonnées et renvoi vers /devis.
+ *
+ * Le formulaire vivait ici avant d'avoir sa propre page. Il n'a pas été dupliqué :
+ * deux formulaires aux champs différents finissent toujours par diverger, et le
+ * visiteur qui remplit le plus court prive l'entreprise du budget et du type de
+ * chantier.
+ */
 ---
 
 <section id="contact" class="bg-surface pt-20 pb-16 lg:pt-28" aria-labelledby="contact-title">
@@ -16,9 +21,9 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
       </div>
 
       <address class="flex flex-col gap-5 text-[17px] not-italic">
-        <a href={site.phoneHref} class="flex items-center gap-4"><Icon name="phone" class="size-5.5 text-accent" />{site.phone}</a>
-        <a href={`mailto:${site.email}`} class="flex items-center gap-4"><Icon name="mail" class="size-5.5 text-accent" />{site.email}</a>
-        <span class="flex items-center gap-4"><Icon name="pin" class="size-5.5 text-accent" />{site.address}</span>
+        <a href={site.phoneHref} class="flex items-center gap-4 hover:text-accent"><Icon name="phone" class="size-5.5 shrink-0 text-accent" />{site.phone}</a>
+        <a href={`mailto:${site.email}`} class="flex items-center gap-4 hover:text-accent"><Icon name="mail" class="size-5.5 shrink-0 text-accent" />{site.email}</a>
+        <span class="flex items-center gap-4"><Icon name="pin" class="size-5.5 shrink-0 text-accent" />{site.address}</span>
       </address>
 
       <div class="flex flex-col gap-3.5">
@@ -36,43 +41,21 @@ const label = "flex flex-col gap-2 text-sm text-neutral-300";
       </div>
     </div>
 
-    <!--
-      Le site est statique : pas de serveur à nous pour recevoir le formulaire.
-      Web3Forms fait le relais et transfère la demande vers site.email.
-      Les trois champs cachés : la clé du compte, l'objet de l'email reçu, et
-      l'adresse de retour après envoi (le service y renvoie le visiteur lui-même,
-      donc aucun JavaScript n'est nécessaire).
-    -->
-    <form class="flex flex-col gap-5" method="POST" action="https://api.web3forms.com/submit">
-      <input type="hidden" name="access_key" value={site.formAccessKey} />
-      <input type="hidden" name="subject" value={`Demande de devis — ${site.name}`} />
-      <input type="hidden" name="redirect" value={new URL("/merci", Astro.site).href} />
-      <!-- Piège à robots : un humain ne voit pas ce champ, donc ne le remplit jamais. -->
-      <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" aria-hidden="true" />
-
-      <div class="grid gap-5 sm:grid-cols-2">
-        <label class={label}>Nom
-          <input class={field} type="text" name="name" autocomplete="name" required />
-        </label>
-        <label class={label}>Téléphone
-          <input class={field} type="tel" name="phone" autocomplete="tel" />
-        </label>
-      </div>
-      <label class={label}>Email
-        <input class={field} type="email" name="email" autocomplete="email" required />
-      </label>
-      <label class={label}>Votre projet
-        <textarea class:list={[field, "min-h-36 resize-y"]} name="message" rows="5" required></textarea>
-      </label>
-      <label class="flex items-start gap-3 text-sm text-neutral-400">
-        <input type="checkbox" name="consentement" value="oui" required
-          class="mt-0.5 size-4.5 shrink-0 accent-accent" />
-        <span>
-          J'accepte que ces informations soient utilisées pour être recontacté au sujet de
-          ma demande (<a href="/confidentialite" class="underline hover:text-accent">politique de confidentialité</a>).
-        </span>
-      </label>
-      <button type="submit" class="btn-accent self-start">Envoyer la demande</button>
-    </form>
+    <div class="flex flex-col items-start gap-6 rounded-2xl border border-line bg-card p-8 lg:p-11">
+      <h3 class="font-display text-2xl font-bold tracking-tight lg:text-[28px]">Demander un devis</h3>
+      <p class="text-[17px] leading-relaxed text-muted">
+        Quelques questions sur le type d'aménagement, la surface et le budget envisagé :
+        de quoi vous rappeler avec une première idée du chantier plutôt qu'avec une page
+        blanche.
+      </p>
+      <ul class="flex flex-col gap-2.5 text-[15px] text-muted">
+        <li class="flex items-center gap-3"><Icon name="check" class="size-4.5 shrink-0 text-accent" strokeWidth={2.5} />Réponse par téléphone ou par email</li>
+        <li class="flex items-center gap-3"><Icon name="check" class="size-4.5 shrink-0 text-accent" strokeWidth={2.5} />Visite et prise de côtes sur place</li>
+        <li class="flex items-center gap-3"><Icon name="check" class="size-4.5 shrink-0 text-accent" strokeWidth={2.5} />Devis détaillé poste par poste</li>
+      </ul>
+      <a href="/devis" class="btn-accent mt-1">
+        Remplir le formulaire <Icon name="arrow-right" class="size-4.5" strokeWidth={2} />
+      </a>
+    </div>
   </div>
 </section>

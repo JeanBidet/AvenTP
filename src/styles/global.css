@@ -34,6 +34,10 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 6rem;
+    /* Les contrôles natifs (cases à cocher, listes déroulantes, barres de
+       défilement) se dessinent en sombre : sans ça, une case non cochée est un
+       carré blanc au milieu d'une page noire. */
+    color-scheme: dark;
   }
   body {
     @apply bg-ink font-sans text-white antialiased;

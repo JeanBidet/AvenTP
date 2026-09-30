@@ -1,0 +1,171 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+import { site, categories } from "../data/site";
+
+/**
+ * Page dédiée à la demande de devis.
+ *
+ * Le formulaire part chez Web3Forms, comme celui de l'accueil auparavant : le site
+ * est statique, il n'a pas de serveur pour recevoir un POST. Le service renvoie
+ * lui-même le visiteur sur /merci, donc aucun JavaScript n'est nécessaire.
+ */
+
+// Types d'aménagement : repris des catégories de réalisations, pour que le
+// formulaire et les filtres de la page Réalisations ne divergent jamais.
+const typesAmenagement = [...Object.values(categories), "Autre"];
+
+/**
+ * Tranches de budget. Ce sont des propositions, pas des informations sur
+ * l'entreprise : à valider avec AvenTP, puisqu'elles annoncent implicitement
+ * un positionnement. Un seul endroit à modifier.
+ */
+const budgets = [
+  "Moins de 5 000 €",
+  "5 000 à 15 000 €",
+  "15 000 à 30 000 €",
+  "Plus de 30 000 €",
+  "Je ne sais pas encore",
+];
+
+const origines = [
+  "Bouche-à-oreille",
+  "Recherche sur internet",
+  "Réseaux sociaux",
+  "Panneau de chantier",
+  "Véhicule ou signalétique",
+  "Annuaire ou plateforme de mise en relation",
+  "Autre",
+];
+
+const field =
+  "w-full rounded-md border border-neutral-700 bg-ink px-4 py-3.5 text-base text-white focus:border-accent focus:outline-none";
+const label = "flex flex-col gap-2 text-sm text-neutral-300";
+---
+
+<BaseLayout
+  title="Demander un devis"
+  description="Décrivez votre projet d'aménagement extérieur : type de travaux, budget, délais. AvenTP vous répond avec une proposition chiffrée."
+>
+  <section class="border-b border-neutral-800 pt-16 pb-8 lg:pt-24 lg:pb-12">
+    <div class="container-site flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+      <div class="flex flex-col gap-4">
+        <p class="eyebrow">Devis</p>
+        <h1 class="font-display text-[44px] leading-none font-bold tracking-tighter lg:text-[64px]">
+          Demander un devis
+        </h1>
+      </div>
+      <p class="max-w-[460px] text-[17px] text-muted">
+        Plus vous en dites, plus la réponse est précise. Aucun champ n'engage à quoi que
+        ce soit : le devis se construit ensuite, sur place.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-14 lg:py-20">
+    <div class="container-site grid gap-14 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-24">
+      <div class="flex flex-col gap-10">
+        <div class="flex flex-col gap-4">
+          <h2 class="font-display text-xl font-bold tracking-tight">Ce qui se passe ensuite</h2>
+          {/*
+            Numéros écrits en clair : Tailwind retire `list-style`, donc le marqueur
+            de la <ol> ne s'affiche pas et plusieurs lecteurs d'écran cessent
+            d'annoncer le rang des éléments.
+          */}
+          <ol class="flex flex-col gap-3 text-[15px] leading-relaxed text-muted">
+            {[
+              "Nous vous rappelons pour préciser le besoin.",
+              "Visite sur place et prise de côtes.",
+              "Devis détaillé poste par poste.",
+            ].map((t, i) => (
+              <li class="flex gap-3">
+                <span class="font-display font-semibold text-accent">{i + 1}.</span>
+                {t}
+              </li>
+            ))}
+          </ol>
+          <a href="/services" class="inline-flex items-center gap-2 self-start text-[15px] font-semibold text-white underline decoration-accent decoration-2 underline-offset-4 hover:text-accent">
+            Le déroulé complet <Icon name="arrow-right" class="size-4" strokeWidth={2} />
+          </a>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <h2 class="font-display text-xl font-bold tracking-tight">Plutôt par téléphone ?</h2>
+          <address class="flex flex-col gap-4 text-[17px] not-italic">
+            <a href={site.phoneHref} class="flex items-center gap-4 hover:text-accent"><Icon name="phone" class="size-5.5 shrink-0 text-accent" />{site.phone}</a>
+            <a href={`mailto:${site.email}`} class="flex items-center gap-4 hover:text-accent"><Icon name="mail" class="size-5.5 shrink-0 text-accent" />{site.email}</a>
+            <span class="flex items-center gap-4"><Icon name="pin" class="size-5.5 shrink-0 text-accent" />{site.address}</span>
+          </address>
+        </div>
+      </div>
+
+      <form class="flex max-w-[46rem] flex-col gap-7" method="POST" action="https://api.web3forms.com/submit">
+        <input type="hidden" name="access_key" value={site.formAccessKey} />
+        <input type="hidden" name="subject" value={`Demande de devis — ${site.name}`} />
+        <input type="hidden" name="redirect" value={new URL("/merci", Astro.site).href} />
+        <!-- Piège à robots : un humain ne voit pas ce champ, donc ne le remplit jamais. -->
+        <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" aria-hidden="true" />
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class={label}>Nom
+            <input class={field} type="text" name="Nom" autocomplete="name" required />
+          </label>
+          <label class={label}>Téléphone
+            <input class={field} type="tel" name="Téléphone" autocomplete="tel" />
+          </label>
+        </div>
+        <label class={label}>Email
+          <input class={field} type="email" name="Email" autocomplete="email" required />
+        </label>
+
+        {/*
+          Cases à cocher et non liste déroulante : un chantier combine souvent
+          plusieurs postes (une terrasse et l'allée qui y mène). Le <fieldset> et
+          sa <legend> remplacent ici le <label>, qui ne peut désigner qu'un champ.
+        */}
+        <fieldset class="flex flex-col gap-3 border-0 p-0">
+          <legend class="mb-1 text-sm text-neutral-300">Type d'aménagement <span class="text-faint">(plusieurs choix possibles)</span></legend>
+          <div class="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+            {typesAmenagement.map((t) => (
+              <label class="flex items-center gap-3 text-[15px]">
+                <input type="checkbox" name="Type d'aménagement" value={t} class="size-4.5 shrink-0 accent-accent" />
+                {t}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class={label}>Budget envisagé
+            <select class={field} name="Budget">
+              <option value="">Non précisé</option>
+              {budgets.map((b) => <option value={b}>{b}</option>)}
+            </select>
+          </label>
+          <label class={label}>Comment nous connaissez-vous ?
+            <select class={field} name="Comment nous connaissez-vous">
+              <option value="">Non précisé</option>
+              {origines.map((o) => <option value={o}>{o}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <label class={label}>Votre projet
+          <textarea class:list={[field, "min-h-40 resize-y"]} name="Projet" rows="6" required
+            placeholder="Surface approximative, état actuel du terrain, délai souhaité…"></textarea>
+        </label>
+
+        <label class="flex items-start gap-3 text-sm text-neutral-400">
+          <input type="checkbox" name="Consentement" value="oui" required
+            class="mt-0.5 size-4.5 shrink-0 accent-accent" />
+          <span>
+            J'accepte que ces informations soient utilisées pour être recontacté au sujet de
+            ma demande (<a href="/confidentialite" class="underline hover:text-accent">politique de confidentialité</a>).
+          </span>
+        </label>
+
+        <button type="submit" class="btn-accent self-start">Envoyer la demande</button>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
