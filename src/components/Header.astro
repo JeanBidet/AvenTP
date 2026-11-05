@@ -2,7 +2,10 @@
 import { Image } from "astro:assets";
 import Icon from "./Icon.astro";
 import { nav, site } from "../data/site";
-import logo from "../assets/img/logo-blanc.png";
+// Version « site » du logo : sans la ligne « Création & aménagement extérieur »,
+// illisible à 64 px de haut. Le dessin et le nom gagnent ainsi ~15 % de taille
+// à hauteur égale. Le logo complet (logo-blanc.png) reste pour les autres supports.
+import logo from "../assets/img/logo-site.png";
 
 // Lien actif : comparaison du chemin courant (sans « / » final) avec chaque lien.
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
@@ -16,16 +19,16 @@ const isCurrent = (href: string) => !href.includes("#") && href === path;
       Le lien porte son propre aria-label, donc l'image reste en alt vide pour que les
       lecteurs d'écran n'annoncent pas le nom en double.
     -->
-    <a href="/" class="flex items-center hover:opacity-80" aria-label={`${site.name} — accueil`}>
+    <a href="/" class="flex shrink-0 items-center hover:opacity-80" aria-label={`${site.name} — accueil`}>
       {/*
-        Taille d'affichage fixe (75 px, 100 px à partir de lg), donc `densities` plutôt
+        Taille d'affichage fixe (73 px, 98 px à partir de lg), donc `densities` plutôt
         que `widths` : Astro ne produit que le 1x et le 2x, et l'image de repli fait
-        100 px de large au lieu des 1159 px de la source.
+        98 px de large au lieu des 986 px de la source.
       */}
       <Image
         src={logo}
         alt=""
-        width={100}
+        width={98}
         densities={[1, 2]}
         loading="eager"
         class="h-12 w-auto lg:h-16"
@@ -40,9 +43,9 @@ const isCurrent = (href: string) => !href.includes("#") && href === path;
       id="site-nav"
       aria-label="Navigation principale"
       data-open="false"
-      class="fixed inset-x-0 top-18 hidden flex-col gap-6 border-b border-neutral-800 bg-ink px-6 pt-4 pb-8 data-[open=true]:flex lg:static lg:flex lg:flex-row lg:items-center lg:gap-10 lg:border-0 lg:p-0"
+      class="fixed inset-x-0 top-18 hidden flex-col gap-6 border-b border-neutral-800 bg-ink px-6 pt-4 pb-8 data-[open=true]:flex lg:static lg:flex lg:flex-row lg:items-center lg:gap-6 lg:border-0 lg:p-0 xl:gap-10"
     >
-      <ul class="flex flex-col text-lg font-medium lg:flex-row lg:gap-8 lg:text-[15px]">
+      <ul class="flex flex-col text-lg font-medium whitespace-nowrap lg:flex-row lg:gap-6 lg:text-[15px] xl:gap-8">
         {nav.map((item) => (
           <li>
             <a
@@ -68,7 +71,7 @@ const isCurrent = (href: string) => !href.includes("#") && href === path;
         ))}
       </ul>
 
-      <a href="/devis" class="btn-accent min-h-11 self-start px-5 text-[15px]">
+      <a href="/devis" class="btn-accent min-h-11 shrink-0 self-start px-5 text-[15px] whitespace-nowrap">
         <Icon name="phone" class="size-4.5" strokeWidth={2} />
         Nous contacter
       </a>

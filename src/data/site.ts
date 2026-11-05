@@ -4,9 +4,9 @@
  */
 export const site = {
   name: "AvenTP",
-  tagline: "Paysagisme · Terrassement",
+  tagline: "Terrassement · Aménagement extérieur",
   description:
-    "AvenTP, entreprise de paysagisme et de terrassement : allées, terrasses, jardins, clôtures et abords de piscine.",
+    "AvenTP, entreprise de terrassement et d'aménagement extérieur : allées, terrasses, clôtures et abords de piscine.",
   phone: "[TÉLÉPHONE]",
   phoneHref: "tel:+33000000000",
   email: "[EMAIL]",
@@ -17,6 +17,13 @@ export const site = {
     { name: "LinkedIn", icon: "linkedin", href: "#" },
   ],
 } as const;
+
+/**
+ * Vrai si la valeur a été renseignée, faux si c'est encore un emplacement
+ * « [À COMPLÉTER] » ou un lien vide « # ». Sert à ne jamais publier une
+ * information factice là où une machine la lirait (données structurées, liens).
+ */
+export const estRenseigne = (valeur: string) => !valeur.startsWith("[") && valeur !== "#";
 
 export const nav = [
   { label: "Accueil", href: "/" },
@@ -30,7 +37,6 @@ export const nav = [
 export const categories = {
   allees: "Allées",
   terrasses: "Terrasses",
-  jardins: "Jardins",
   clotures: "Clôtures",
   piscines: "Piscines",
 } as const;

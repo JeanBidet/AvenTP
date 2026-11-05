@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 import { getImage } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
 import { site } from "../data/site";
 import "../styles/global.css";
 import ogSource from "../assets/img/hero-terrasse-jardin.jpg";
@@ -33,7 +34,16 @@ const ogImage = new URL(og.src, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, follow" />}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      Favicons tirés de l'arbre du logo. Trois formats parce que chaque client lit le
+      sien : les navigateurs prennent le PNG 32 px, les vieux outils et certains
+      robots demandent /favicon.ico « à l'aveugle », iOS utilise apple-touch-icon
+      pour l'écran d'accueil, Android lit le manifeste.
+    -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#000000" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
@@ -50,6 +60,8 @@ const ogImage = new URL(og.src, Astro.site);
     <script is:inline>document.documentElement.classList.add("js");</script>
     <!-- View Transitions : navigation entre pages sans rechargement, avec fondu. -->
     <ClientRouter />
+    <!-- Emplacement pour ce qu'une page veut ajouter au <head> (ex. données structurées). -->
+    <slot name="head" />
   </head>
   <body class="min-h-screen">
     <a href="#contenu" class="sr-only z-100 rounded-md bg-accent px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:top-4 focus:left-4">
@@ -60,6 +72,23 @@ const ogImage = new URL(og.src, Astro.site);
       <slot />
     </main>
     <Footer />
+
+    <!--
+      Bouton d'appel, mobile uniquement : sur téléphone, beaucoup de clients d'un
+      artisan préfèrent appeler plutôt que remplir un formulaire. Lien tel: = le
+      téléphone propose directement de composer le numéro.
+      Fixé en bas à droite, à portée de pouce ; env(safe-area-inset-bottom) l'écarte
+      de la barre de geste des iPhone. transition:persist garde le même élément d'une
+      page à l'autre (View Transitions) : il ne clignote pas à chaque navigation.
+    -->
+    <a
+      href={site.phoneHref}
+      transition:persist
+      class="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 grid size-14 place-items-center rounded-full bg-accent text-ink shadow-[0_8px_24px_rgb(0_0_0/0.5)] transition-transform active:scale-95 lg:hidden"
+      aria-label={`Appeler ${site.name}`}
+    >
+      <Icon name="phone" class="size-6" strokeWidth={2} />
+    </a>
 
     <script>
       // Apparition au défilement : IntersectionObserver ajoute .is-visible

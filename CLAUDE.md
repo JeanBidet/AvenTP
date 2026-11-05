@@ -1,6 +1,6 @@
 # AvenTP — site vitrine
 
-Site vitrine d'AvenTP, entreprise de **paysagisme et terrassement**. Sobre, sombre, orienté
+Site vitrine d'AvenTP, entreprise de **terrassement et d'aménagement extérieur**. Sobre, sombre, orienté
 photos de chantiers et demande de devis.
 
 ## Façon de travailler
