@@ -23,6 +23,9 @@
 
   --radius-arch: 999px;
 
+  /* Décélération douce : démarre vite, se pose lentement (effets de survol). */
+  --ease-survol: cubic-bezier(0.22, 0.61, 0.36, 1);
+
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(24px); }
@@ -109,18 +112,61 @@
   clavier si la carte devient cliquable.
 */
 @media (hover: hover) {
+  /*
+    Au survol, quatre choses en même temps, sur la même courbe pour qu'elles se
+    lisent comme un seul geste :
+    - la photo passe du noir et blanc à la couleur ;
+    - elle s'avance doucement (zoom de 6 %, lent : 900 ms) — le cadre arrondi,
+      en overflow: hidden, rogne l'excédent, donc la carte ne bouge pas ;
+    - le voile sombre du bas se lève, comme si on allumait la photo ;
+    - un trait couleur accent se dessine sous le titre, qui passe lui aussi en accent.
+    On n'anime que transform, opacity et filter : le navigateur les calcule sur
+    la carte graphique, sans recalculer la mise en page — l'effet reste fluide.
+  */
   .colorise-au-survol img {
     filter: grayscale(1);
-    transition: filter 600ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition:
+      filter 600ms var(--ease-survol),
+      transform 900ms var(--ease-survol);
   }
+  .colorise-au-survol .survol-voile {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent 55%);
+    transition: opacity 600ms var(--ease-survol);
+  }
+  .colorise-au-survol .survol-titre {
+    align-self: flex-start;
+    background: linear-gradient(var(--color-accent), var(--color-accent)) no-repeat left bottom / 0 2px;
+    padding-bottom: 4px;
+    transition:
+      background-size 500ms var(--ease-survol),
+      color 300ms ease;
+  }
+
   .colorise-au-survol:hover img,
   .colorise-au-survol:focus-within img {
     filter: grayscale(0);
+    transform: scale(1.06);
+  }
+  .colorise-au-survol:hover .survol-voile,
+  .colorise-au-survol:focus-within .survol-voile { opacity: 0; }
+  .colorise-au-survol:hover .survol-titre,
+  .colorise-au-survol:focus-within .survol-titre {
+    color: var(--color-accent);
+    background-size: 100% 2px;
   }
 }
 
+/* Mouvement réduit demandé par le système : la couleur change toujours, mais
+   sans zoom ni transition. */
 @media (hover: hover) and (prefers-reduced-motion: reduce) {
-  .colorise-au-survol img { transition-duration: 0ms; }
+  .colorise-au-survol img,
+  .colorise-au-survol .survol-voile,
+  .colorise-au-survol .survol-titre { transition-duration: 0ms; }
+  .colorise-au-survol:hover img,
+  .colorise-au-survol:focus-within img { transform: none; }
 }
 
 /* Apparition au défilement. Masqué seulement si JS est actif (classe .js sur <html>) :
@@ -132,4 +178,37 @@
   html { scroll-behavior: auto; }
   .js .reveal { opacity: 1; }
   .js .reveal.is-visible { animation: none; }
+}
+
+/*
+  Visionneuse des réalisations (<dialog class="lightbox">).
+  Un <dialog> a par défaut une taille limitée, une bordure et une marge : on le
+  passe en plein écran. 100dvh plutôt que 100vh : sur mobile, la hauteur suit la
+  barre d'adresse qui apparaît et disparaît, la photo n'est jamais coupée.
+*/
+.lightbox {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-ink); /* opaque : la page derrière ne doit pas distraire de la photo */
+  color: white;
+  touch-action: pan-y; /* le geste horizontal est pour nous, le zoom vertical reste au navigateur */
+}
+.lightbox::backdrop { background: rgb(0 0 0 / 0.6); }
+.lightbox[open] { animation: lightbox-entree 250ms var(--ease-survol); }
+@keyframes lightbox-entree {
+  from { opacity: 0; transform: scale(0.98); }
+}
+.lightbox-ouverte { overflow: hidden; }
+
+@utility lb-bouton {
+  @apply grid size-12 cursor-pointer place-items-center rounded-full border border-line-strong bg-ink/70 text-white transition-colors hover:border-accent hover:text-accent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox[open] { animation: none; }
 }

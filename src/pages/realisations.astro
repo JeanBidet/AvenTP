@@ -1,11 +1,19 @@
 ---
 import { getCollection } from "astro:content";
+import { getImage } from "astro:assets";
+import Icon from "../components/Icon.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import CtaBand from "../components/CtaBand.astro";
 import { categories, type Category } from "../data/site";
 
 const projects = (await getCollection("realisations")).sort((a, b) => a.data.order - b.data.order);
+
+// Grandes versions pour la visionneuse : 960 px (téléphone) et 1600 px (écran large).
+// Le navigateur choisit grâce au srcset, comme pour les vignettes.
+const grandes = await Promise.all(
+  projects.map((p) => getImage({ src: p.data.image, widths: [960, 1600], format: "webp" })),
+);
 
 // Compteurs calculés au build à partir des fiches : ajouter un fichier Markdown suffit.
 const count = (c: Category) => projects.filter((p) => p.data.category === c).length;
@@ -15,7 +23,7 @@ const filters = [
 ];
 ---
 
-<BaseLayout title="Réalisations" description="Allées, terrasses, jardins, clôtures, piscines : les chantiers réalisés par AvenTP.">
+<BaseLayout title="Réalisations" description="Allées, terrasses, clôtures, piscines : les chantiers réalisés par AvenTP.">
   <section class="border-b border-neutral-800 pt-16 pb-8 lg:pt-24 lg:pb-12">
     <div class="container-site flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
       <div class="flex flex-col gap-4">
@@ -23,7 +31,7 @@ const filters = [
         <h1 class="font-display text-[44px] leading-none font-bold tracking-tighter lg:text-[64px]">Nos chantiers</h1>
       </div>
       <p class="max-w-[460px] text-[17px] text-muted">
-        Allées, terrasses, jardins, clôtures, piscines : un aperçu des extérieurs que nous avons aménagés.
+        Allées, terrasses, clôtures, piscines : un aperçu des extérieurs que nous avons aménagés.
       </p>
     </div>
   </section>
@@ -51,11 +59,50 @@ const filters = [
     <ul class="grid gap-x-6 gap-y-12 pb-20 sm:grid-cols-2 lg:grid-cols-3 lg:pb-30">
       {projects.map((p, i) => (
         <li data-category={p.data.category} class="reveal">
-          <ProjectCard project={p} showTag imgClass="h-[320px] rounded-2xl" eager={i < 3} coloriseAuSurvol />
+          <ProjectCard
+            project={p}
+            showTag
+            imgClass="h-[320px] rounded-2xl"
+            eager={i < 3}
+            coloriseAuSurvol
+            zoom={{ src: grandes[i].src, srcset: grandes[i].srcSet.attribute }}
+          />
         </li>
       ))}
     </ul>
   </div>
+
+  <!--
+    Visionneuse. <dialog> ouvert avec showModal() : le navigateur gère lui-même le
+    fond, la touche Échap, le piège du focus clavier à l'intérieur, et rend le reste
+    de la page inerte pour les lecteurs d'écran. On n'ajoute que la navigation.
+  -->
+  <dialog data-lightbox class="lightbox" aria-label="Photos des réalisations">
+    <div class="flex h-full flex-col">
+      <div class="flex items-center justify-between gap-4 px-4 py-3 lg:px-8 lg:py-5">
+        <p data-lb-compteur class="text-sm font-semibold tabular-nums text-faint" aria-live="polite"></p>
+        <button type="button" data-lb-fermer class="lb-bouton" aria-label="Fermer">
+          <Icon name="close" class="size-6" strokeWidth={2} />
+        </button>
+      </div>
+
+      <div data-lb-scene class="relative flex min-h-0 flex-1 items-center justify-center px-4 lg:px-24">
+        <img data-lb-img alt="" sizes="100vw" class="max-h-full max-w-full rounded-lg object-contain transition-opacity duration-300" />
+        <button type="button" data-lb-prec class="lb-bouton absolute left-3 hidden sm:grid lg:left-8" aria-label="Photo précédente">
+          <Icon name="arrow-left" class="size-6" strokeWidth={2} />
+        </button>
+        <button type="button" data-lb-suiv class="lb-bouton absolute right-3 hidden sm:grid lg:right-8" aria-label="Photo suivante">
+          <Icon name="arrow-right" class="size-6" strokeWidth={2} />
+        </button>
+      </div>
+
+      <div class="flex flex-col items-center gap-1 px-4 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-center lg:pb-8">
+        <p data-lb-categorie class="eyebrow"></p>
+        <p data-lb-titre class="font-display text-xl font-bold tracking-tight lg:text-2xl"></p>
+        <p class="text-xs text-faint sm:hidden">Glissez pour passer d'une photo à l'autre</p>
+      </div>
+    </div>
+  </dialog>
 
   <CtaBand title="Un projet similaire ?">
     Décrivez-nous votre terrain et vos envies, nous revenons vers vous avec un devis.
@@ -96,5 +143,76 @@ const filters = [
 
     const fromHash = location.hash.slice(1);
     apply(buttons.some((b) => b.dataset.filter === fromHash) ? fromHash : "tous");
+  });
+
+  // Visionneuse : un clic sur une carte ouvre sa photo en grand. On ne fait défiler
+  // que les cartes visibles — si le filtre « Clôtures » est actif, les flèches
+  // restent dans les clôtures.
+  document.addEventListener("astro:page-load", () => {
+    const dlg = document.querySelector<HTMLDialogElement>("[data-lightbox]");
+    if (!dlg) return;
+    const $ = <T extends Element = HTMLElement>(sel: string) => dlg.querySelector<T>(sel)!;
+    const img = $<HTMLImageElement>("[data-lb-img]");
+    const compteur = $("[data-lb-compteur]");
+    const titre = $("[data-lb-titre]");
+    const categorie = $("[data-lb-categorie]");
+    const scene = $("[data-lb-scene]");
+
+    const cartes = [...document.querySelectorAll<HTMLAnchorElement>("[data-zoom]")];
+    let liste: HTMLAnchorElement[] = [];
+    let index = 0;
+
+    const montrer = (i: number) => {
+      index = (i + liste.length) % liste.length; // boucle : après la dernière, la première
+      const a = liste[index];
+      img.style.opacity = "0"; // fondu : la nouvelle photo apparaît une fois chargée
+      img.srcset = a.dataset.srcset ?? "";
+      img.src = a.href;
+      img.alt = a.dataset.alt ?? "";
+      titre.textContent = a.dataset.titre ?? "";
+      categorie.textContent = a.dataset.categorie ?? "";
+      compteur.textContent = `${index + 1} / ${liste.length}`;
+      // Précharge la suivante : le passage à la photo d'après est instantané.
+      const suivante = liste[(index + 1) % liste.length];
+      Object.assign(new Image(), { sizes: "100vw", srcset: suivante.dataset.srcset ?? "" });
+    };
+    img.addEventListener("load", () => (img.style.opacity = "1"));
+
+    for (const a of cartes) {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        liste = cartes.filter((c) => !c.closest("[hidden]"));
+        montrer(liste.indexOf(a));
+        dlg.showModal();
+        document.documentElement.classList.add("lightbox-ouverte"); // bloque le défilement derrière
+      });
+    }
+    dlg.addEventListener("close", () => document.documentElement.classList.remove("lightbox-ouverte"));
+
+    $("[data-lb-fermer]").addEventListener("click", () => dlg.close());
+    $("[data-lb-prec]").addEventListener("click", () => montrer(index - 1));
+    $("[data-lb-suiv]").addEventListener("click", () => montrer(index + 1));
+    dlg.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") montrer(index - 1);
+      if (e.key === "ArrowRight") montrer(index + 1);
+    });
+    // Un clic dans le vide autour de la photo ferme, comme on s'y attend.
+    scene.addEventListener("click", (e) => {
+      if (e.target === scene) dlg.close();
+    });
+
+    // Glisser au doigt : on compare la position du doigt au début et à la fin.
+    // Au-delà de 50 px horizontalement (et plus horizontal que vertical), on change.
+    let x0 = 0;
+    let y0 = 0;
+    scene.addEventListener("pointerdown", (e) => {
+      x0 = e.clientX;
+      y0 = e.clientY;
+    });
+    scene.addEventListener("pointerup", (e) => {
+      if (e.pointerType !== "touch") return;
+      const dx = e.clientX - x0;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - y0)) montrer(index + (dx < 0 ? 1 : -1));
+    });
   });
 </script>

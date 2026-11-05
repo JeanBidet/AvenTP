@@ -13,6 +13,12 @@ interface Props {
   eager?: boolean;
   /** Photo en noir et blanc, colorisée au survol (voir .colorise-au-survol) */
   coloriseAuSurvol?: boolean;
+  /**
+   * Grande version de la photo, pour la visionneuse (page Réalisations). Si fournie,
+   * la carte devient un lien vers cette image : sans JavaScript le lien ouvre
+   * simplement la photo, avec JavaScript la visionneuse l'intercepte.
+   */
+  zoom?: { src: string; srcset: string };
 }
 
 const {
@@ -21,11 +27,32 @@ const {
   imgClass = "h-[300px] rounded-lg",
   eager = false,
   coloriseAuSurvol = false,
+  zoom,
 } = Astro.props;
 const { title, category, city, year, image, alt } = project.data;
+
+// <a> si la carte s'agrandit, <div> sinon. Un lien peut contenir une <figure>
+// (un <button> non : il n'accepte que du contenu « en ligne »).
+const Enveloppe = zoom ? "a" : "div";
 ---
 
-<figure class:list={["m-0 flex flex-col gap-3.5", coloriseAuSurvol && "colorise-au-survol"]}>
+<Enveloppe
+  class:list={[
+    "block",
+    coloriseAuSurvol && "colorise-au-survol",
+    zoom && "cursor-zoom-in rounded-2xl outline-offset-4 focus-visible:outline-2 focus-visible:outline-accent",
+  ]}
+  {...zoom && {
+    href: zoom.src,
+    "data-zoom": "",
+    "data-srcset": zoom.srcset,
+    "data-alt": alt,
+    "data-titre": title,
+    "data-categorie": categories[category],
+    "aria-label": `Agrandir la photo : ${title}`,
+  }}
+>
+<figure class="m-0 flex flex-col gap-3.5">
   <div class="relative overflow-hidden rounded-[inherit]">
     <!--
       <Image> (astro:assets) génère plusieurs tailles en WebP au build ;
@@ -40,6 +67,7 @@ const { title, category, city, year, image, alt } = project.data;
       loading={eager ? "eager" : "lazy"}
       class:list={["w-full object-cover", imgClass]}
     />
+    {coloriseAuSurvol && <span class="survol-voile" aria-hidden="true"></span>}
     {showTag && (
       <span class="absolute top-4 left-4 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold tracking-wider text-accent uppercase">
         {categories[category]}
@@ -47,7 +75,8 @@ const { title, category, city, year, image, alt } = project.data;
     )}
   </div>
   <figcaption class="flex flex-col gap-1">
-    <span class="text-[17px] font-semibold">{title}</span>
+    <span class="survol-titre text-[17px] font-semibold">{title}</span>
     <span class="text-sm text-faint">{city} · {year}</span>
   </figcaption>
 </figure>
+</Enveloppe>
