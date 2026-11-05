@@ -1,18 +1,19 @@
 ---
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SectionHeading from "../components/SectionHeading.astro";
 import Carousel from "../components/Carousel.astro";
 import Contact from "../components/Contact.astro";
 import Icon from "../components/Icon.astro";
+import { site, estRenseigne } from "../data/site";
 
 import hero from "../assets/img/piscine_fond.jpg";
-import imgAllee from "../assets/img/allee-gravier-dalles.jpg";
-import imgTerrasse from "../assets/img/illu-terrasse.svg";
-import imgJardin from "../assets/img/illu-jardin.svg";
-import imgCloture from "../assets/img/cloture-bois-pierre.jpg";
+import imgAllee from "../assets/img/allee-pavee.jpg";
+import imgTerrasse from "../assets/img/terrasse-pavee-marches.jpg";
+import imgCloture from "../assets/img/muret-pierre-ardoise.jpg";
 import imgPiscine from "../assets/img/piscine-plage-pierre.jpg";
+import logoSource from "../assets/img/logo.png";
 
 // Réalisations types. Chaque vignette a sa découpe : un grand rayon de 88 px sur
 // certains coins, 16 px sur les autres. L'ordre des quatre valeurs est celui de CSS :
@@ -21,24 +22,42 @@ import imgPiscine from "../assets/img/piscine-plage-pierre.jpg";
 // 88 px et non 999 px comme à l'origine : à 999 px les deux coins du haut se rejoignent
 // toujours, quelle que soit la largeur, et la vignette devient un demi-cercle. À 88 px
 // la courbe est franche sur les grandes cartes et ne dégénère qu'au plus étroit.
-// Un seul endroit à changer pour l'ajuster : les cinq valeurs ci-dessous.
+// Un seul endroit à changer pour l'ajuster : les quatre valeurs ci-dessous.
 const types = [
   { title: "Allées", text: "Pavés, dalles, gravier stabilisé ou béton désactivé.", img: imgAllee,
-    alt: "Allée en gravier bordée de dalles", href: "/realisations#allees",
+    alt: "Allée pavée bordée de graminées le long d'une maison", href: "/realisations#allees",
     shape: "rounded-[88px_88px_16px_16px]" },                        // porte : arrondie en haut
   { title: "Terrasses", text: "Bois, composite, pierre ou carrelage sur plot.", img: imgTerrasse,
-    alt: "Illustration d'une terrasse en bois sous pergola", href: "/realisations#terrasses",
+    alt: "Terrasse pavée avec marches en dalles noires", href: "/realisations#terrasses",
     shape: "rounded-[88px_16px_88px_16px]" },                        // diagonale haut-gauche / bas-droite
-  { title: "Jardins", text: "Engazonnement, plantations, massifs et haies.", img: imgJardin,
-    alt: "Illustration d'un jardin avec pelouse, haie et massif fleuri", href: "/realisations#jardins",
-    shape: "rounded-[16px_88px_16px_88px]" },                        // diagonale haut-droite / bas-gauche
   { title: "Clôtures", text: "Clôtures, portails, brise-vue et murets.", img: imgCloture,
-    alt: "Clôture en lames de bois entre des piliers en pierre", href: "/realisations#clotures",
+    alt: "Muret en pierre et lames d'ardoise avec pilier", href: "/realisations#clotures",
     shape: "rounded-[88px_16px_16px_16px]" },                        // un seul coin, haut-gauche
   { title: "Piscines", text: "Terrassement de la fosse, plages et abords.", img: imgPiscine,
     alt: "Piscine entourée d'une plage en pierre", href: "/realisations#piscines",
     shape: "rounded-[16px_16px_88px_88px]" },                        // porte inversée : arrondie en bas
 ];
+
+// Données structurées (schema.org, format JSON-LD) : une fiche « entreprise locale »
+// invisible pour le visiteur, lue par Google pour sa fiche de résultats et les
+// recherches « près de chez moi ». On n'y met que ce qui est réellement renseigné :
+// tant que le téléphone vaut « [TÉLÉPHONE] », il est simplement omis — une fausse
+// donnée ici serait pire que pas de donnée.
+const logoLd = await getImage({ src: logoSource, width: 512, format: "png" });
+const sameAs = site.socials.map((s) => s.href).filter(estRenseigne);
+const entreprise = {
+  "@context": "https://schema.org",
+  "@type": "HomeAndConstructionBusiness",
+  name: site.name,
+  description: site.description,
+  url: Astro.site?.href,
+  logo: new URL(logoLd.src, Astro.site).href,
+  image: new URL(logoLd.src, Astro.site).href,
+  ...(estRenseigne(site.phone) && { telephone: site.phone }),
+  ...(estRenseigne(site.email) && { email: site.email }),
+  ...(estRenseigne(site.address) && { address: site.address }),
+  ...(sameAs.length > 0 && { sameAs }),
+};
 
 // Diaporama : les chantiers marqués « featured: true », triés par « order ».
 const featured = (await getCollection("realisations", ({ data }) => data.featured))
@@ -46,6 +65,7 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
 ---
 
 <BaseLayout>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(entreprise)} />
   <!--
     Hero : photo pleine largeur atténuée (opacity) sur fond vert très sombre.
     object-cover + object-center : la photo remplit la section quelle que soit sa
@@ -70,12 +90,12 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
     />
     <div class="container-site relative">
       <div class="mb-8 flex w-full max-w-[640px] animate-fade-up flex-col gap-5 border-t-6 border-accent bg-ink px-7 py-8 lg:mb-16 lg:px-12 lg:py-11">
-        <p class="text-[13px] font-semibold tracking-[2px] text-accent uppercase">Paysagisme · Terrassement</p>
+        <p class="text-[13px] font-semibold tracking-[2px] text-balance text-accent uppercase">{site.tagline}</p>
         <h1 class="font-display text-[32px] leading-[1.05] font-bold tracking-tight sm:text-[40px] lg:text-[52px]">
-          Aménager vos extérieurs, du terrain brut au jardin fini.
+          Aménager vos extérieurs, du terrain brut à la dernière finition.
         </h1>
         <p class="text-[17px] text-muted">
-          [Phrase d'accroche : zone d'intervention, savoir-faire, type de clientèle — particuliers, professionnels, collectivités.]
+          Allées, terrasses, clôtures et abords de piscine autour de [Ville] : nous préparons le sol, posons et finissons, pour les particuliers comme pour les professionnels.
         </p>
         <div class="flex flex-wrap gap-3 pt-2">
           <a href="/devis" class="btn-accent">Demander un devis</a>
@@ -90,11 +110,11 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
     <div class="container-site">
       <SectionHeading eyebrow="Nos métiers" title="Ce que nous réalisons" id="services-title">
         <p class="max-w-[440px] text-muted">
-          Du terrassement préparatoire jusqu'aux finitions paysagères, AvenTP prend en charge l'ensemble de votre projet extérieur.
+          Du terrassement préparatoire jusqu'aux finitions, AvenTP prend en charge l'ensemble de votre projet extérieur.
         </p>
       </SectionHeading>
 
-      <ul class="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 xl:grid-cols-5 xl:gap-6">
+      <ul class="grid grid-cols-2 gap-x-4 gap-y-8 xl:grid-cols-4 xl:gap-6">
         {types.map((t, i) => (
           <li class="reveal" style={`animation-delay: ${i * 80}ms`}>
             <a href={t.href} class="group flex flex-col gap-4.5 hover:text-white">
@@ -103,7 +123,7 @@ const featured = (await getCollection("realisations", ({ data }) => data.feature
                   src={t.img}
                   alt={t.alt}
                   widths={[300, 500]}
-                  sizes="(min-width: 1280px) 250px, (min-width: 640px) 33vw, 50vw"
+                  sizes="(min-width: 1280px) 310px, 50vw"
                   class="h-[220px] w-full object-cover transition-transform duration-500 group-hover:scale-105 lg:h-[300px]"
                 />
               </div>

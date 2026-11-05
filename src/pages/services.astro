@@ -1,6 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { Image } from "astro:assets";
 import CtaBand from "../components/CtaBand.astro";
+// Une photo par étape, choisie pour ce que dit le texte. Celles qui ne viennent
+// pas des chantiers AvenTP (terrain, niveau, devis, pose) sont sous licence libre :
+// auteurs et licences dans les mentions légales.
+import imgTerrain from "../assets/img/services-terrain-brut.jpg";
+import imgNiveau from "../assets/img/services-niveau.jpg";
+import imgMateriaux from "../assets/img/terrasse-pavee-marches.jpg";
+import imgDevis from "../assets/img/services-devis-plan.jpg";
+import imgPose from "../assets/img/services-pose-paves.jpg";
 
 /**
  * Déroulé d'un chantier type, en cinq étapes.
@@ -9,6 +18,10 @@ import CtaBand from "../components/CtaBand.astro";
  * `aRemplir` optionnel (engagements propres à l'entreprise : délais, gratuité,
  * garanties). Ces derniers restent entre crochets tant qu'AvenTP ne les a pas
  * fournis — les inventer donnerait des promesses commerciales fausses.
+ *
+ * Chaque étape a aussi une `photo` de vrai chantier. Toutes en ont une : les étapes
+ * ont la même hauteur (pour que la courbe garde un rythme régulier), donc une étape
+ * sans photo laisserait un trou.
  */
 const etapes = [
   {
@@ -16,35 +29,45 @@ const etapes = [
     texte:
       "Vous décrivez votre projet : ce que l'espace ne vous permet pas aujourd'hui, ce que vous voudriez en faire, comment vous l'utilisez au quotidien. On parle usage avant de parler matériaux, parce qu'une allée carrossable, un coin repas et une zone de jeux n'imposent pas les mêmes contraintes de structure. La visite sur place complète l'échange : accès du terrain aux engins, pente, nature du sol, écoulement des eaux.",
     aRemplir:
-      "[Le premier rendez-vous est-il gratuit ? Sous quel délai ? Sur quelle zone géographique intervenez-vous ?]",
+      "Visite et devis gratuits, sous [X] jours, dans un rayon de [X] km autour de [Ville].",
+    photo: imgTerrain,
+    alt: "Terrain encore brut derrière une maison : pelouse clairsemée, arbres et sous-bois",
   },
   {
-    titre: "Prise de côtes",
+    titre: "Prise de cotes",
     texte:
       "Relevé du terrain : dimensions, différences de niveau, pentes, réseaux enterrés et limites de propriété. C'est l'étape qui conditionne tout le reste, parce qu'elle fixe les quantités — surface à paver, volume de terre à décaisser et à évacuer, linéaire de bordure. Un relevé soigné, c'est un devis qui n'a pas à être corrigé en cours de chantier.",
     aRemplir:
-      "[Déclaration de projet de travaux (DT-DICT) pour le repérage des réseaux : à préciser si vous la prenez en charge.]",
+      "Les déclarations de travaux (DT-DICT) pour le repérage des réseaux enterrés sont faites par nos soins avant le chantier.",
+    photo: imgNiveau,
+    alt: "Gros plan sur la bulle d'un niveau de chantier jaune",
   },
   {
     titre: "Choix des matériaux",
     texte:
-      "Pavés, dalles, bois, composite, gravier stabilisé, béton désactivé, essences végétales : chaque option se juge sur trois critères — l'usage qu'elle doit supporter, l'entretien qu'elle demande, le budget. L'orientation se fait vers ce qui tient dans la durée à votre exposition et sur votre type de sol, plutôt que vers ce qui photographie le mieux.",
+      "Pavés, dalles, bois, composite, gravier stabilisé, béton désactivé : chaque option se juge sur trois critères — l'usage qu'elle doit supporter, l'entretien qu'elle demande, le budget. L'orientation se fait vers ce qui tient dans la durée à votre exposition et sur votre type de sol, plutôt que vers ce qui photographie le mieux.",
     aRemplir:
-      "[Échantillons fournis ? Visite de chantiers témoins ? Plan ou vue 3D avant décision ?]",
+      "Échantillons apportés sur place et plan d'implantation fourni avant toute décision.",
+    photo: imgMateriaux,
+    alt: "Terrasse associant pavés aux tons clairs et dalles noires pour l'emmarchement",
   },
   {
     titre: "Devis",
     texte:
       "Un devis détaillé poste par poste : préparation et terrassement, fournitures, main-d'œuvre, évacuation des déblais. Ce découpage n'est pas cosmétique — il vous permet d'arbitrer, de réduire une surface ou de changer un matériau, sans avoir à reprendre le projet depuis le début.",
     aRemplir:
-      "[Durée de validité du devis ? Acompte demandé à la commande ? Modalités de paiement ?]",
+      "Devis valable [X] mois. Acompte de [X] % à la commande, solde à la réception des travaux.",
+    photo: imgDevis,
+    alt: "Un professionnel en gilet de sécurité annote un document sur un plan",
   },
   {
     titre: "Réalisation",
     texte:
       "Terrassement et décaissement, fond de forme, drainage si le terrain le demande, pose, finitions, puis nettoyage et évacuation. Le chantier se déroule avec un interlocuteur unique, du premier coup de godet à la réception des travaux.",
     aRemplir:
-      "[Délai habituel entre l'acceptation du devis et le début des travaux ? Durée moyenne d'un chantier ? Garantie décennale et assurances : à préciser.]",
+      "Démarrage sous [X] semaines après acceptation du devis, pour un chantier de [X] jours en moyenne. Travaux couverts par une garantie décennale.",
+    photo: imgPose,
+    alt: "Pose de pavés en cours sur un lit de pose, le long d'une maison",
   },
 ];
 ---
@@ -101,7 +124,7 @@ const etapes = [
               le raccord entre deux étapes est lisse, et elle passe exactement par le
               centre (50, 50) où se pose le point.
             */}
-            <div class="relative col-start-1 row-start-1 xl:col-start-2">
+            <div class="relative col-start-1 row-span-2 row-start-1 xl:col-start-2 xl:row-span-1">
               <svg
                 class="absolute inset-0 size-full overflow-visible"
                 viewBox="0 0 100 100"
@@ -141,6 +164,27 @@ const etapes = [
               <h3 class="font-display text-2xl font-bold tracking-tight lg:text-[28px]">{e.titre}</h3>
               <p class="text-[17px] leading-relaxed text-muted">{e.texte}</p>
               <p class="text-[15px] leading-relaxed text-faint">{e.aRemplir}</p>
+            </div>
+
+            {/*
+              Photo de l'étape. En dessous de xl : sous le texte, dans la même colonne
+              (ligne 2 ; la rampe couvre les deux lignes, le chemin reste continu).
+              À partir de xl : dans la colonne d'en face, qui était vide — la photo
+              équilibre la page au lieu de l'allonger.
+            */}
+            <div
+              class:list={[
+                "col-start-2 row-start-2 max-w-[38rem] pb-9 lg:pb-14 xl:row-start-1 xl:max-w-[30rem] xl:self-center xl:py-14",
+                i % 2 === 0 ? "xl:col-start-1 xl:justify-self-end xl:pr-14" : "xl:col-start-3 xl:pl-14",
+              ]}
+            >
+              <Image
+                src={e.photo}
+                alt={e.alt}
+                widths={[480, 800, 1100]}
+                sizes="(min-width: 1280px) 30rem, (min-width: 768px) 38rem, calc(100vw - 9rem)"
+                class="aspect-[4/3] w-full rounded-2xl object-cover"
+              />
             </div>
           </li>
         ))}

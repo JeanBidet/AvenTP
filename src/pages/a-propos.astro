@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { site } from "../data/site";
-import chantier from "../assets/img/allee-gravier-dalles.jpg";
+import chantier from "../assets/img/allee-beton-courbe.jpg";
 
 /**
  * Page de présentation, volontairement courte : qui c'est, ce qu'il sait faire,
@@ -20,7 +20,7 @@ const chiffres = [
 ];
 
 const qualifications = [
-  "[CAP / BP aménagements paysagers]",
+  "[Diplôme — CAP, BP…]",
   "[CACES conduite d'engins]",
   "[Assurance décennale]",
   "[Responsabilité civile professionnelle]",
@@ -29,7 +29,7 @@ const qualifications = [
 
 <BaseLayout
   title="À propos"
-  description={`Qui est derrière ${site.name} : parcours et savoir-faire d'une entreprise de paysagisme et de terrassement.`}
+  description={`Qui est derrière ${site.name} : parcours et savoir-faire d'une entreprise de terrassement et d'aménagement extérieur.`}
 >
   <section class="border-b border-neutral-800 pt-16 pb-8 lg:pt-24 lg:pb-12">
     <div class="container-site flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
@@ -40,7 +40,7 @@ const qualifications = [
         </h1>
       </div>
       <p class="max-w-[460px] text-[17px] text-muted">
-        [Une phrase d'accroche : ce qui distingue l'entreprise, ou son rapport au métier.]
+        Un seul interlocuteur du premier coup de pelle au dernier pavé posé : celui qui chiffre votre chantier est celui qui le réalise.
       </p>
     </div>
   </section>
@@ -65,18 +65,21 @@ const qualifications = [
           <h2 id="portrait-titre" class="font-display text-[32px] leading-tight font-bold tracking-tight lg:text-[42px]">
             [Prénom Nom]
           </h2>
-          <p class="text-[17px] font-semibold text-accent">[Fonction — gérant, artisan paysagiste…]</p>
+          <p class="text-[17px] font-semibold text-accent">Gérant</p>
         </div>
 
         <div class="flex max-w-[58ch] flex-col gap-5 text-[17px] leading-relaxed text-muted">
           <p>
-            [Où il a appris le métier, combien d'années sur le terrain, les types de
-            chantiers qui l'ont formé.]
+            Formé par un [Diplôme — CAP, BP…], [Prénom] a passé
+            [X] ans sur les chantiers d'autres entreprises : terrassements de lotissements,
+            réseaux, puis aménagements extérieurs chez les particuliers. De quoi apprendre que
+            la tenue d'une allée se joue sous terre, dans le fond de forme, bien avant la pose.
           </p>
           <p>
-            [Ce qui l'a décidé à créer l'entreprise et en quelle année, et ce qu'il
-            préfère dans le métier. Ce détail-là vaut plus que dix lignes de
-            généralités.]
+            En [Année], il crée {site.name} pour suivre lui-même chaque projet de bout en
+            bout. Ce qu'il préfère : le moment où le client redécouvre un terrain qu'il ne
+            savait pas comment utiliser, devenu une terrasse où l'on déjeune ou une allée où
+            l'on ne se tord plus les chevilles.
           </p>
         </div>
 
